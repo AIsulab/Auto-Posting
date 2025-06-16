@@ -19,7 +19,7 @@ if not st.session_state['login_ok']:
         if user_id == VALID_ID and user_pw == VALID_PW:
             st.session_state['login_ok'] = True
             st.success("로그인 성공! 자동화 프로그램을 시작합니다.")
-            st.experimental_set_query_params()  # 쿼리 파라미터 초기화
+            st.experimental_rerun()  # 페이지 새로 고침
         else:
             st.error("아이디/비밀번호가 틀렸습니다.")
     st.stop()  # 로그인 화면에서 멈춤
