@@ -434,13 +434,8 @@ with st.expander("🔧 고급 설정 (선택사항)"):
 # 설정 요약 표시
 st.info(f"💡 설정 요약: {blogger_type} 스타일 + {writing_mood} + 개인화 요소들")
 
-# 최종 생성 버튼 (더 눈에 띄게)
-st.markdown("---")
-st.markdown("### 🚀 AI 블로그 글 생성")
-if st.button("✨ 고품질 개인 블로그 글 생성", type="primary", use_container_width=True):
-
     # 블로그 글 구조 상수 정의
-    BLOG_STRUCTURES = [
+BLOG_STRUCTURES = [
     "문제-해결형",
     "방법론-중심형",
     "경험-공유형",
