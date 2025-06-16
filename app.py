@@ -908,6 +908,8 @@ def generate_travel_blog(keyword, current_season):
 
 *이 글이 도움되셨다면 ❤️ 공감과 공유 부탁드려요!*
 """
+    
+    return blog_content
 
 def generate_finance_blog(keyword, current_season):
     """재테크 전용 블로그 생성 - 실전 경험과 수익 인증으로 신뢰도 확보"""
