@@ -59,12 +59,17 @@ def generate_ai_blog(keyword, current_season):
     title = random.choice(ai_titles)
     hook = random.choice(ai_hooks)
     
+       # 무료 이미지 가져오기
+    images = get_free_images(keyword, 3)
+    
     # AI 전용 블로그 내용
     blog_content = f"""# {title}
 
 {hook}
 
 오늘은 제가 실제로 사용해보고 효과를 본 {keyword} 활용법을 공유해드릴게요.
+
+![{images[0]['alt']}]({images[0]['url']})
 
 ## 🤔 왜 {keyword}를 시작하게 되었나요?
 
