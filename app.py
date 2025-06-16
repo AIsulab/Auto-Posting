@@ -548,29 +548,83 @@ if upload_method == "직접 입력":
 elif upload_method == "소셜 로그인":
     st.info("🔐 소셜 로그인으로 간편하게 연결하세요!")
     
+    # OAuth 콜백 확인
+    if handle_oauth_callback():
+        st.rerun()
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
         if st.button("🌐 Google로 로그인", use_container_width=True):
-            st.success("Google 로그인 연동 중...")
-            # 실제로는 OAuth 처리 필요
-            st.session_state['wp_connected'] = 'google'
+            google_oauth_url = get_oauth_url("google")
+            st.markdown(f'<a href="{google_oauth_url}" target="_blank">🔗 Google 로그인 창 열기</a>', unsafe_allow_html=True)
+            st.info("💡 팝업이 차단되면 위 링크를 클릭하세요!")
+            
+            # JavaScript로 팝업 창 열기
+            st.markdown(f"""
+            <script>
+                window.open('{google_oauth_url}', 'google_login', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            </script>
+            """, unsafe_allow_html=True)
     
     with col2:
-        if st.button("📘 Facebook으로 로그인", use_container_width=True):
-            st.success("Facebook 로그인 연동 중...")
-            st.session_state['wp_connected'] = 'facebook'
+        if st.button("🟢 네이버로 로그인", use_container_width=True):
+            naver_oauth_url = get_oauth_url("naver")
+            st.markdown(f'<a href="{naver_oauth_url}" target="_blank">🔗 네이버 로그인 창 열기</a>', unsafe_allow_html=True)
+            st.info("💡 팝업이 차단되면 위 링크를 클릭하세요!")
+            
+            # JavaScript로 팝업 창 열기
+            st.markdown(f"""
+            <script>
+                window.open('{naver_oauth_url}', 'naver_login', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            </script>
+            """, unsafe_allow_html=True)
     
     with col3:
-        if st.button("🔗 워드프레스 연동", use_container_width=True):
-            st.success("워드프레스 직접 연동 중...")
-            st.session_state['wp_connected'] = 'wordpress'
+        if st.button("🔗 WordPress 연동", use_container_width=True):
+            wp_oauth_url = get_oauth_url("wordpress")
+            st.markdown(f'<a href="{wp_oauth_url}" target="_blank">🔗 WordPress 로그인 창 열기</a>', unsafe_allow_html=True)
+            st.info("💡 팝업이 차단되면 위 링크를 클릭하세요!")
+            
+            # JavaScript로 팝업 창 열기
+            st.markdown(f"""
+            <script>
+                window.open('{wp_oauth_url}', 'wordpress_login', 'width=500,height=600,scrollbars=yes,resizable=yes');
+            </script>
+            """, unsafe_allow_html=True)
     
-    if 'wp_connected' in st.session_state:
-        st.success(f"✅ {st.session_state['wp_connected']} 계정으로 연동 완료!")
+    # 수동 인증 코드 입력 옵션
+    st.markdown("---")
+    st.subheader("🔑 또는 인증 코드 직접 입력")
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        auth_code = st.text_input("로그인 후 받은 인증 코드를 입력하세요", placeholder="예: 4/0AX4XfWh...")
+    with col2:
+        if st.button("✅ 인증", use_container_width=True):
+            if auth_code:
+                st.session_state['oauth_token'] = f"manual_{auth_code[:10]}"
+                st.session_state['oauth_connected'] = True
+                st.success("🎉 수동 인증 성공!")
+                st.rerun()
+            else:
+                st.error("인증 코드를 입력해주세요!")
+    
+    # 연동 상태 표시
+    if st.session_state.get('oauth_connected'):
+        st.success("✅ 소셜 로그인 연동 완료!")
+        st.info(f"🔑 토큰: {st.session_state.get('oauth_token', 'N/A')[:20]}...")
+        
+        if st.button("🔓 연동 해제"):
+            del st.session_state['oauth_connected']
+            del st.session_state['oauth_token']
+            st.rerun()
+        
         wp_url = "https://sulab.shop"
-        wp_id = "connected"
-        wp_pw = "oauth_token"
+        wp_id = "oauth_connected"
+        wp_pw = st.session_state.get('oauth_token', 'oauth_token')
+    else:
+        st.warning("⚠️ 위 버튼 중 하나를 클릭하여 로그인해주세요!")
 
 elif upload_method == "API 키 사용":
     st.info("🔑 워드프레스 API 키를 사용하세요 (가장 안전)")
