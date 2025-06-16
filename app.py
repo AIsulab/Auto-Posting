@@ -443,7 +443,10 @@ if 'generated_content' in st.session_state:
     if st.button("📤 워드프레스에 업로드"):
         if wp_url and wp_id and wp_pw:
             with st.spinner("워드프레스에 업로드 중..."):
-                api_url = f"{wp_url}/wp-json/wp/v2/posts"
+                if wp_url.endswith('/'):
+    api_url = f"{wp_url}wp-json/wp/v2/posts"
+else:
+    api_url = f"{wp_url}/wp-json/wp/v2/posts"
                 
                 # 제목 추출 (첫 번째 줄에서 # 제거)
                 content = st.session_state['generated_content']
