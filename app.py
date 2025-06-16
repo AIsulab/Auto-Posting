@@ -279,7 +279,74 @@ else:
 st.markdown("---")
 st.subheader("📝 블로그 글 생성")
 
-keyword = st.text_input("블로그 주제/키워드", placeholder="예: 혈압에 좋은 음식, 다이어트 비법")
+# 트렌딩 키워드 시스템
+st.markdown("---")
+st.subheader("🔥 트렌딩 키워드 선택")
+
+# 키워드 데이터베이스
+TRENDING_KEYWORDS = {
+    "건강": ["혈압관리", "다이어트", "당뇨예방", "면역력강화", "수면장애", "스트레스해소", "허리통증", "탈모방지", "피부관리", "영양제", "운동법", "금연", "금주", "눈건강", "치아관리"],
+    "재테크": ["주식투자", "부동산투자", "적금", "펀드", "가상화폐", "부업", "창업", "용돈벌이", "절약팁", "연금", "보험", "세금절약"],
+    "여행": ["국내여행", "해외여행", "캠핑", "맛집", "카페", "독서", "영화추천", "드라마", "홈트레이닝", "요리"],
+    "육아교육": ["육아팁", "교육정보", "학습법", "입시", "영어공부", "자격증", "취업", "이직"],
+    "라이프스타일": ["정리정돈", "인테리어", "패션", "뷰티", "반려동물", "가전제품", "쇼핑", "배달음식", "온라인쇼핑", "미니멀라이프"]
+}
+
+# 계절별 핫 키워드
+import datetime
+current_month = datetime.now().month
+SEASONAL_HOT = {
+    "겨울": ["다이어트", "운동", "금연", "새해계획", "독감예방", "겨울여행"],
+    "봄": ["봄나들이", "알레르기", "춘곤증", "미세먼지", "벚꽃명소", "봄철건강"],
+    "여름": ["여름휴가", "다이어트", "에어컨", "자외선", "물놀이", "여름철건강"],
+    "가을": ["가을여행", "독감예방", "환절기건강", "단풍명소", "가을운동", "면역력"]
+}
+
+season_key = ["겨울", "봄", "여름", "가을"][((current_month-1)//3)]
+hot_keywords = SEASONAL_HOT[season_key]
+
+# UI 구성
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    keyword_method = st.radio(
+        "키워드 선택 방식:",
+        ["🔥 트렌딩 키워드", "✍️ 직접 입력"]
+    )
+
+with col2:
+    st.info(f"🌟 {season_key}철 HOT 키워드")
+    for hot in hot_keywords[:3]:
+        st.caption(f"• {hot}")
+
+if keyword_method == "🔥 트렌딩 키워드":
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        category = st.selectbox("카테고리 선택", list(TRENDING_KEYWORDS.keys()))
+    
+    with col2:
+        keyword = st.selectbox("세부 키워드", TRENDING_KEYWORDS[category])
+    
+    # 핫 키워드 빠른 선택
+    st.markdown("#### 🌟 이번 달 인기 키워드 (원클릭)")
+    cols = st.columns(len(hot_keywords))
+    for i, hot_keyword in enumerate(hot_keywords):
+        with cols[i]:
+            if st.button(f"🔥 {hot_keyword}", key=f"hot_{i}"):
+                keyword = hot_keyword
+                st.success(f"'{hot_keyword}' 선택됨!")
+
+else:
+    keyword = st.text_input("키워드 직접 입력", placeholder="예: 혈압에 좋은 음식, 투자 비법")
+
+# 선택된 키워드 표시
+if keyword:
+    st.success(f"✅ 선택된 키워드: **{keyword}**")
+    
+    # 키워드별 예상 조회수 (가상)
+    estimated_views = random.randint(5000, 50000)
+    st.info(f"📊 예상 월 조회수: {estimated_views:,}회 | 📈 트렌드: 상승")
 
 # 고품질 블로거 스타일 옵션
 st.subheader("✨ 개인 블로거 스타일 설정")
