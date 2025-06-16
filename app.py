@@ -551,19 +551,21 @@ def generate_local_blog(keyword, hook_style):
     
     # 페르소나별 맞춤 인사말
     greetings = {
-        "건강관리사_김민지": f"안녕하세요! {persona['location']}에서 {persona['experience']} 영양사로 일하고 있는 김민지입니다.",
-        "헬스트레이너_박준호": f"운동 좋아하시나요? 부산에서 PT 하고 있는 박준호 트레이너입니다!",
-        "약사_이수현": f"안녕하세요, 대구에서 약국 운영하고 있는 약사 이수현입니다.",
-        "주부_최은영": f"안녕하세요~ 두 아이 엄마이자 전직 간호사 최은영이에요!"
-    }
+    "건강_의사": f"안녕하세요! {persona['job']} {persona['experience']} 차입니다.",
+    "운동_트레이너": f"운동 좋아하시나요? {persona['job']} {persona['experience']} 차입니다!",
+    "요리_셰프": f"안녕하세요, {persona['job']} {persona['experience']} 차입니다.",
+    "공부_교사": f"안녕하세요~ {persona['job']} {persona['experience']} 차입니다!",
+    "직장_멘토": f"안녕하세요, {persona['job']} {persona['experience']} 차입니다."
+}
     
     # 페르소나별 전문성 표현
     expertise = {
-        "건강관리사_김민지": f"병원에서 매일 환자분들 상담하면서 느끼는 건데",
-        "헬스트레이너_박준호": f"헬스장에서 {people_count}명 넘게 지도해보니까",
-        "약사_이수현": f"약국에서 {persona['experience']} 상담해본 경험으로는",
-        "주부_최은영": f"간호사 출신이라 의학적 지식과 엄마 경험을 합치면"
-    }
+    "건강_의사": f"{persona['specialty']} 분야에서 {persona['experience']} 일하면서 느끼는 건데",
+    "운동_트레이너": f"{persona['specialty']} 전문가로 활동하면서",
+    "요리_셰프": f"{persona['specialty']} 분야 {persona['experience']} 경험으로는",
+    "공부_교사": f"{persona['specialty']} 전문가로서",
+    "직장_멘토": f"{persona['specialty']} 컨설팅 {persona['experience']} 경험으로는"
+}
     
     # 구조별 다른 시작 방식
     if structure == "개인_경험담_중심":
