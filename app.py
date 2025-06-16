@@ -39,6 +39,8 @@ def generate_local_blog(keyword, hook_style):
     """고품질 개인 블로거 스타일 글 생성"""
     
     # ===== 5단계 + 6단계: 여기부터 추가 =====
+    current_season = get_current_season()
+    
     def detect_keyword_category(keyword):
         """키워드에서 카테고리 자동 감지"""
         ai_keywords = ["AI", "인공지능", "챗GPT", "로봇", "자동화", "머신러닝", "딥러닝"]
