@@ -99,7 +99,12 @@ def generate_local_blog(keyword, hook_style):
     # 개인적 경험담 생성
     personal_exp = generate_personal_experience(keyword, persona, persona_name)
     
-    # 시작 스타일 선택
+    # 키워드 카테고리 감지하고 맞춤 도입부 선택
+    keyword_category = detect_keyword_category(keyword)
+    category_intros = KEYWORD_INTROS[keyword_category]
+    selected_intro = random.choice(category_intros)
+
+    # 시작 스타일 선택 (수정됨)
     if structure == "개인_경험담_중심":
         start_style = f"{personal_exp}\n\n그때 정말 깨달았어요. {keyword}이(가) 얼마나 중요한지를..."
     elif structure == "실패담_중심":
@@ -107,7 +112,7 @@ def generate_local_blog(keyword, hook_style):
     elif structure == "Q&A_형식":
         start_style = f"많은 분들이 {keyword}에 대해 자주 물어보시는 질문들이 있어요."
     else:
-        start_style = f"{expertise[persona_name]}, {keyword}에 대해서는 정말 할 말이 많아요."
+        start_style = selected_intro  # 여기가 핵심 변경점!
     
     # AI SULAB 고정 블로그 글 생성
     blog_content = f"""# {keyword} 완벽 가이드 - AI SULAB이 전해드리는 검증된 정보
