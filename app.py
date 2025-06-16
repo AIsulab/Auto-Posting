@@ -1,6 +1,47 @@
 import streamlit as st
 import requests
+import pyotp
 
+########## 1. 로그인 & 구글 OTP 2차 인증 ##########
+VALID_ID = "myid"         # 대표님만 아는 아이디
+VALID_PW = "mysecretpw"   # 대표님만 아는 비밀번호
+TOTP_SECRET = "JBSWY3DPEHPK3PXP"  # 구글 OTP 앱에 등록할 시크릿
+
+if 'login_ok' not in st.session_state:
+    st.session_state['login_ok'] = False
+if 'otp_ok' not in st.session_state:
+    st.session_state['otp_ok'] = False
+
+# 1차 로그인
+if not st.session_state['login_ok']:
+    st.title("대표님 전용 블로그 자동화 로그인")
+    user_id = st.text_input("아이디")
+    user_pw = st.text_input("비밀번호", type="password")
+    if st.button("로그인"):
+        if user_id == VALID_ID and user_pw == VALID_PW:
+            st.session_state['login_ok'] = True
+            st.experimental_rerun()
+        else:
+            st.error("아이디/비밀번호가 틀렸습니다.")
+    st.stop()
+
+# 2차(OTP) 인증
+if not st.session_state['otp_ok']:
+    st.title("2차 인증(구글 OTP)")
+    totp = pyotp.TOTP(TOTP_SECRET)
+    otp_input = st.text_input("구글 OTP 앱에 뜨는 6자리 코드 입력")
+    if st.button("인증하기"):
+        if totp.verify(otp_input):
+            st.session_state['otp_ok'] = True
+            st.success("2차 인증 성공! 자동화 프로그램 시작")
+            st.experimental_rerun()
+        else:
+            st.error("OTP 코드가 일치하지 않습니다.")
+    st.info("구글 OTP 앱에 아래 시크릿을 등록하세요 (앱에서 '설정 키 입력' 선택):")
+    st.code(TOTP_SECRET)
+    st.stop()
+
+########## 2. 본문 - AI 자동화 블로그 툴 ##########
 st.set_page_config(page_title="AI 통합 블로그 자동화", layout="centered")
 st.title("AI 자동 건강 블로그 생성 · 워드프레스 자동 업로드")
 
@@ -14,14 +55,13 @@ st.markdown(
     """
 )
 
-# 1. 사용자 입력 (키워드)
+# 1. 키워드 입력
 keyword = st.text_input("블로그 주제/키워드", placeholder="예: 혈압 낮추는 음식, 탈모 예방, 건강검진 준비")
 
-# 2. OpenAI API 키 입력 (보안 때문에 직접 입력)
+# 2. OpenAI API 키 입력
 openai_key = st.text_input("OpenAI API 키", type="password", help="https://platform.openai.com/api-keys 에서 발급")
 
 ai_content = ""
-# 3. AI 글 생성
 if st.button("AI 블로그 글 생성"):
     if not keyword or not openai_key:
         st.warning("키워드와 OpenAI API 키를 모두 입력해주세요.")
@@ -51,27 +91,23 @@ if st.button("AI 블로그 글 생성"):
             else:
                 st.error(f"OpenAI 에러: {response.text}")
 
-# 4. 워드프레스 정보 입력 (자동 업로드)
 st.markdown("---")
 st.subheader("워드프레스 자동 업로드")
 
 wp_url = st.text_input("워드프레스 주소 (https://로 시작)", key="wp_url")
 wp_id = st.text_input("워드프레스 아이디", key="wp_user")
 wp_pw = st.text_input("워드프레스 비밀번호", type="password", key="wp_pw")
-auto_title = ""
-auto_content = ""
 
 # 글 제목/본문 자동 추출
+auto_title = ""
+auto_content = ""
 if ai_content:
-    # 제목: 첫 줄 혹은 "#", "**" 등으로 시작하는 부분 추출
     lines = [line.strip() for line in ai_content.split('\n') if line.strip()]
-    # 소제목(~3개)와 결론도 자동 추출, 필요시 추후 고도화 가능
     auto_title = lines[0] if lines else keyword
     auto_content = ai_content
-
 else:
-    auto_title = st.text_input("업로드할 글 제목 (AI 글 생성 후 자동 입력, 직접 입력 가능)", key="wp_title")
-    auto_content = st.text_area("업로드할 글 내용 (AI 글 생성 후 자동 입력, 직접 입력 가능)", key="wp_content")
+    auto_title = st.text_input("업로드할 글 제목 (직접 입력/AI 글 생성 후 자동 입력)", key="wp_title")
+    auto_content = st.text_area("업로드할 글 내용 (직접 입력/AI 글 생성 후 자동 입력)", key="wp_content")
 
 if st.button("워드프레스로 글 업로드"):
     if not (wp_url and wp_id and wp_pw and (auto_title or auto_content)):
@@ -88,11 +124,10 @@ if st.button("워드프레스로 글 업로드"):
         except Exception as e:
             st.error(f"워드프레스 연동 에러: {e}")
 
-# 5. 네이버 블로그 복붙 안내
 st.markdown("---")
 st.subheader("네이버 블로그: 글 복사해서 등록 (공식 API 없음)")
 if ai_content:
     st.info("아래 내용 복사해서 네이버 블로그에 새 글로 붙여넣으세요!")
     st.code(auto_title + "\n\n" + auto_content, language="markdown")
 
-st.caption("by 수랩대표님 자동화 파이프라인")
+st.caption("by 대표님 자동화 파이프라인")
