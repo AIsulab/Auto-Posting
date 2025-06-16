@@ -395,7 +395,7 @@ def generate_finance_blog(keyword, current_season):
         f"{keyword} 초보자도 월 50만원 수익! 3개월 실전 후기",
         f"💰 {keyword} 실패담 공개 - 300만원 날린 후 찾은 진짜 방법",
         f"📈 {keyword} 고수가 알려주는 숨겨진 수익 포인트 7가지",
-        f"🔥 {keyword} 2024년 전망 - 지금 시작해야 하는 이유",
+        f"🔥 {keyword} 2025년 전망 - 지금 시작해야 하는 이유",
         f"⚡ {keyword} 자동 수익 시스템 구축법 (직장인 부업 추천)"
     ]
     
@@ -583,7 +583,7 @@ FOMO(Fear of Missing Out)에 빠져서 고점에 매수 → 30% 손실
 
 ---
 
-## 🎯 2024년 {keyword} 전망과 추천 전략
+## 🎯 2025년 {keyword} 전망과 추천 전략
 
 ### 상반기 전망
 - 📈 경기 회복으로 상승 기조 유지
@@ -910,257 +910,29 @@ def generate_travel_blog(keyword, current_season):
 """
     
 
+def generate_education_blog(keyword, current_season):
+    """교육 관련 블로그 글 생성"""
+    return generate_local_blog(keyword, "교육_전문가")
+
+def generate_lifestyle_blog(keyword, current_season):
+    """라이프스타일 관련 블로그 글 생성"""
+    return generate_local_blog(keyword, "라이프스타일_전문가")
+
+def generate_trend_blog(keyword, current_season):
+    """트렌드 관련 블로그 글 생성"""
+    return generate_local_blog(keyword, "트렌드_분석가")
+
+def generate_health_blog(keyword, current_season):
+    """건강 관련 블로그 글 생성"""
+    return generate_local_blog(keyword, "건강_전문가")
+
 def generate_finance_blog(keyword, current_season):
-    """재테크 전용 블로그 생성 - 실전 경험과 수익 인증으로 신뢰도 확보"""
-    
-    # 무료 이미지 가져오기
-    images = get_free_images(keyword, 3)
-    
-    # 재테크 전용 훅킹 제목들
-    finance_titles = [
-        f"{keyword} 초보자도 월 50만원 수익! 3개월 실전 후기",
-        f"💰 {keyword} 실패담 공개 - 300만원 날린 후 찾은 진짜 방법",
-        f"📈 {keyword} 고수가 알려주는 숨겨진 수익 포인트 7가지",
-        f"🔥 {keyword} 2025년 전망 - 지금 시작해야 하는 이유",
-        f"⚡ {keyword} 자동 수익 시스템 구축법 (직장인 부업 추천)"
-    ]
-    
-    # 재테크 전용 훅킹 시작 문장들
-    finance_hooks = [
-        f"작년 이맘때 {keyword}를 시작해서 지금까지 누적 수익이 1,200만원을 넘었습니다.",
-        f"{keyword}로 실패만 3번 하고 나서야 깨달은 진짜 핵심을 공유해드릴게요.",
-        f"직장 다니면서 {keyword}로 부업 수익 월 평균 80만원을 만들고 있어요.",
-        f"처음엔 {keyword}가 어려워 보였는데, 지금은 없어서는 안 될 수익원이 됐어요."
-    ]
-    
-    # 랜덤 선택
-    title = random.choice(finance_titles)
-    hook = random.choice(finance_hooks)
-    
-    # 수익 관련 랜덤 수치
-    monthly_profit = random.randint(30, 150)
-    success_rate = random.randint(75, 92)
-    period_months = random.randint(3, 12)
-    
-    # 재테크 전용 블로그 내용
-    blog_content = f"""# {title}
+    """재테크 관련 블로그 글 생성"""
+    return generate_local_blog(keyword, "재테크_전문가")
 
-{hook}
-
-솔직하게 수익 인증과 함께 제가 실제로 해본 {keyword} 경험을 공유해드릴게요.
-
-<img src="{images[0]['url']}" alt="{images[0]['alt']}" style="width:100%; max-width:600px; height:auto; margin:20px 0; border-radius:8px; display:block;">
-
-## 💰 실제 수익 현황 공개 (스크린샷 첨부)
-
-**지난 {period_months}개월 누적 수익:**
-- 📊 총 수익: {monthly_profit * period_months:,}만원
-- 📈 월 평균: {monthly_profit}만원
-- 🎯 성공률: {success_rate}%
-- 💪 재투자 비율: 60%
-
-**이 글에서 얻어가실 것들:**
-- ✅ {keyword} 시작하는 구체적인 방법
-- ✅ 초보자 실수 방지 체크리스트  
-- ✅ 월 50만원 수익 달성 로드맵
-- ✅ 리스크 관리 핵심 전략
-- ✅ 세금 절약 꿀팁까지!
-
----
-
-## 🚀 {keyword} 시작하기 전 필수 준비사항
-
-<img src="{images[1]['url']}" alt="{images[1]['alt']}" style="width:100%; max-width:600px; height:auto; margin:20px 0; border-radius:8px; display:block;">
-
-### 1️⃣ 자금 관리 원칙 (가장 중요!)
-
-**절대 지켜야 할 3가지:**
-- 💡 생활비 6개월치는 별도 보관
-- 💡 투자 자금은 잃어도 되는 돈으로만
-- 💡 한 곳에 몰빵 절대 금지
-
-**추천 자금 배분:**
-- 🔵 안전 자산 (60%): 예금, 적금
-- 🟡 중위험 자산 (30%): {keyword}
-- 🔴 고위험 자산 (10%): 고수익 상품
-
-### 2️⃣ {current_season}철 {keyword} 시장 분석
-
-**현재 시장 상황:**
-- 📈 전년 동기 대비 상승세
-- 🌍 글로벌 경제 회복 신호
-- 💼 기관 투자자 유입 증가
-
-**{current_season}철 특징:**
-- 🎯 {keyword} 수요 증가 시기
-- 💰 보너스 시즌으로 자금 유입
-- 📊 연말 정산 효과 기대
-
-### 3️⃣ 플랫폼 선택 가이드
-
-**초보자 추천 순위:**
-1. **A플랫폼** ⭐⭐⭐⭐⭐
-   - 수수료: 0.1%
-   - 장점: 사용 편의성 최고
-   - 단점: 상품 다양성 부족
-
-2. **B플랫폼** ⭐⭐⭐⭐
-   - 수수료: 0.15%
-   - 장점: 분석 도구 풍부
-   - 단점: 초보자에게 복잡
-
-3. **C플랫폼** ⭐⭐⭐
-   - 수수료: 0.2%
-   - 장점: 교육 자료 많음
-   - 단점: 속도 느림
-
----
-
-## 📈 실전 투자 전략 (월 50만원 수익 달성법)
-
-### 전략 1: 분산 투자 포트폴리오
-
-**제가 실제 사용하는 비율:**
-- 🏢 대형주 (40%): 안정성 확보
-- 🚀 성장주 (35%): 수익성 추구  
-- 🌍 해외 (15%): 환율 헤지
-- 💎 테마주 (10%): 고수익 기회
-
-### 전략 2: 타이밍 분석법
-
-**매수 타이밍:**
-- 📉 시장 조정 시 (20% 이상 하락)
-- 📊 거래량 급증 후 안정화
-- 🗞️ 악재 출현 후 1-2주
-
-**매도 타이밍:**
-- 📈 목표 수익률 달성 (20-30%)
-- 📰 호재 소식 정점
-- 🔴 기술적 지표 과열
-
-### 전략 3: 리스크 관리
-
-**손절 원칙:**
-- 🚨 -10% 도달 시 무조건 손절
-- 📱 알림 설정으로 감정 배제
-- 📝 손절 이유 반드시 기록
-
-**수익 관리:**
-- 🎯 +20% 달성 시 50% 매도
-- 💰 +30% 달성 시 추가 30% 매도
-- 🔄 남은 20%로 추가 상승 기대
-
----
-
-## 🚨 초보자가 반드시 피해야 할 실수 TOP 5
-
-### ❌ 실수 1: 감정적 투자
-
-**실패 사례:** 
-FOMO(Fear of Missing Out)에 빠져서 고점에 매수 → 30% 손실
-
-**해결책:**
-- 📋 투자 계획서 미리 작성
-- ⏰ 쿨타임 24시간 원칙
-- 🤝 투자 스터디 그룹 참여
-
-### ❌ 실수 2: 과도한 레버리지
-
-**실패 사례:**
-3배 레버리지로 큰 수익 노림 → 마진콜로 전 재산 날림
-
-**해결책:**
-- 💡 레버리지 최대 1.5배까지만
-- 📊 증거금 여유분 항상 확보
-- 🛡️ 스탑로스 주문 필수
-
-### ❌ 실수 3: 정보 과의존
-
-**실패 사례:**
-유튜버 추천 종목만 따라하기 → 연속 손실
-
-**해결책:**
-- 🔍 자체 분석 능력 기르기
-- 📚 기본기 공부 우선
-- 💭 다양한 의견 종합 판단
-
----
-
-## 💡 세금 절약 꿀팁 (연간 100만원 절약 가능)
-
-### ISA 계좌 활용법
-
-**장점:**
-- 🎁 연간 200만원 비과세 혜택
-- 💰 손익통산으로 세금 최적화
-- 🔄 자유로운 상품 변경
-
-**활용 전략:**
-- 고수익 상품을 ISA에 우선 배치
-- 손실 종목과 수익 종목 균형 조절
-- 만기 시 연금계좌로 이월
-
-### 연금저축 세액공제
-
-**절세 효과:**
-- 📋 연간 최대 66만원 세액공제
-- 💼 소득 구간별 공제율 차등
-- 🎯 은퇴 준비와 절세 동시 효과
-
----
-
-## 🎯 2025년 {keyword} 전망과 추천 전략
-
-### 상반기 전망
-- 📈 경기 회복으로 상승 기조 유지
-- 🏦 금리 인하 가능성으로 유동성 증가
-- 🌍 해외 자금 유입 기대
-
-### 하반기 전망  
-- 🗳️ 정치적 이벤트 영향 주의
-- 📊 실적 시즌 변동성 확대
-- 💱 환율 변동 리스크 관리 필요
-
-### 추천 투자 테마
-1. **AI 관련주** - 기술 혁신 수혜
-2. **2차전지** - 전기차 보급 확산  
-3. **바이오** - 고령화 사회 대비
-4. **리츠** - 부동산 간접 투자
-
----
-
-## 🤝 마무리하며...
-
-<img src="{images[2]['url']}" alt="{images[2]['alt']}" style="width:100%; max-width:600px; height:auto; margin:20px 0; border-radius:8px; display:block;">
-
-{keyword}는 단순한 돈벌이가 아닌 미래를 위한 준비입니다.
-
-**성공하는 투자자의 공통점:**
-- 🎯 명확한 목표 설정
-- 📚 꾸준한 학습
-- 😌 감정 통제
-- ⏰ 장기적 관점
-
-**마지막 조언:**
-- 💪 작은 금액부터 시작하세요
-- 📖 실패도 소중한 경험입니다
-- 🤝 혼자가 아닌 함께 성장하세요
-
-**여러분의 재정 자유를 응원합니다!** 
-
-성공 사례나 궁금한 점이 있으시면 댓글로 공유해주세요. 서로 도움이 되는 정보를 나눠요!
-
----
-
-**🔗 관련 글 더 보기:**
-- [{keyword} 세금 완벽 가이드]
-- [초보자를 위한 포트폴리오 구성법]
-- [{current_season}철 투자 전략]
-
-*이 글이 도움되셨다면 ❤️ 공감과 공유 부탁드려요!*
-"""
-    
-    return blog_content
+def generate_travel_blog(keyword, current_season):
+    """여행 관련 블로그 글 생성"""
+    return generate_local_blog(keyword, "여행_전문가")
 
 def generate_local_blog(keyword, hook_style):
     """키워드별 맞춤 고품질 블로그 생성"""
@@ -1647,272 +1419,6 @@ KEYWORD_PERSONA_MAPPING = {
 }
 
 def get_smart_persona(keyword):
-    """키워드에 맞는 전문 페르소나 선택"""
-    matched_category = None
-    for category in KEYWORD_PERSONA_MAPPING.keys():
-        if category in keyword:
-            matched_category = category
-            break
-    
-    if matched_category:
-        persona_name = random.choice(KEYWORD_PERSONA_MAPPING[matched_category])
-    else:
-        persona_name = random.choice(list(BLOGGER_PERSONAS.keys()))
-    
-    return persona_name, BLOGGER_PERSONAS[persona_name]
-
-# 랜덤 이름 생성기
-RANDOM_NAMES = ["김○○", "이○○", "박○○", "최○○", "정○○", "강○○", "조○○", "윤○○", "임○○", "한○○", 
-                "오○○", "서○○", "신○○", "권○○", "황○○", "안○○", "송○○", "류○○", "전○○", "홍○○"]
-
-# 다양한 상황별 경험담
-EXPERIENCE_TEMPLATES = {
-    "혈압": [
-        "{location}에 사는 {age}대 {gender}분이 혈압 {number}으로 오셨을 때...",
-        "제 {family}가 고혈압으로 {situation} 후 우리 가족이 바뀐 이야기",
-        "{experience} 일하면서 가장 기억에 남는 혈압 관리 성공 사례",
-        "혈압약 없이 관리하겠다며 찾아온 {age}대 {job}분의 놀라운 변화",
-        "{period}개월 전 제가 직접 겪은 혈압 관리 실패담과 성공 스토리"
-    ],
-    "다이어트": [
-        "{weight}kg에서 {target_weight}kg 감량에 성공한 {age}대 {gender}분 사례",
-        "{location} 헬스장에서 만난 회원분의 {period}개월 변화 스토리",
-        "제가 직접 {period}개월간 시도해본 다이어트 솔직 후기",
-        "요요 없이 {years}년째 유지 중인 비결을 알려드려요",
-        "{season}철 다이어트로 {percent}% 성공률을 보인 방법"
-    ]
-}
-
-def generate_random_experience(keyword, persona):
-    """매번 다른 개인 경험담 생성"""
-    category = "혈압" if "혈압" in keyword else "다이어트"
-    template = random.choice(EXPERIENCE_TEMPLATES[category])
-    
-    # 랜덤 변수들
-    random_vars = {
-        "location": persona['location'],
-        "age": random.choice(["20", "30", "40", "50", "60"]),
-        "gender": random.choice(["남성", "여성"]),
-        "number": random.randint(140, 180),
-        "family": random.choice(["아버지", "어머니", "형", "언니", "동생"]),
-        "situation": random.choice(["쓰러지신", "응급실에 가신", "건강검진에서 발견된"]),
-        "experience": persona['experience'],
-        "job": random.choice(["회사원", "자영업자", "주부", "학생", "교사"]),
-        "period": random.randint(2, 12),
-        "weight": random.randint(70, 95),
-        "target_weight": random.randint(55, 75),
-        "years": random.randint(1, 5),
-        "percent": random.randint(80, 95),
-        "season": random.choice(["봄", "여름", "가을", "겨울"])
-    }
-    
-    return template.format(**random_vars)
-
-# URL에서 로그인 상태 먼저 복원
-if st.query_params.get('logged_in') == 'true':
-    st.session_state['login_ok'] = True
-
-# 로그인 체크
-if not st.session_state.get('login_ok', False):
-    st.title("진수 대표님 전용 블로그 자동화 로그인")
-    
-    # 계정 정보 미리 입력
-    user_id = st.text_input("아이디", value="aisulab")
-    user_pw = st.text_input("비밀번호", value="!js44358574", type="password")
-    
-    if st.button("로그인"):
-        if user_id == VALID_ID and user_pw == VALID_PW:
-            st.session_state['login_ok'] = True
-            st.query_params['logged_in'] = 'true'  # URL에 로그인 상태 저장
-            st.success("✅ 로그인 성공!")
-            time.sleep(0.5)
-            st.rerun()
-        else:
-            st.error("❌ 아이디/비밀번호가 틀렸습니다.")
-    
-    # 자동 로그인 옵션
-    if st.checkbox("🔒 로그인 상태 유지 (이 브라우저에서)", value=True):
-        st.info("💡 새로고침해도 로그인이 유지됩니다")
-    
-    st.stop()
-
-# 메인 화면
-st.title("📝 AI 블로그 자동화 시스템")
-st.markdown("### 🤖 AI 글 생성 | 📤 워드프레스 업로드 | 📋 네이버 블로그 복사")
-
-# 로그아웃 버튼
-if st.button("🚪 로그아웃", key="logout"):
-    st.session_state['login_ok'] = False
-    st.query_params.clear()
-    st.rerun()
-
-st.markdown("---")
-st.subheader("🤖 AI 모델 선택")
-
-# 실제 작동하는 무료 AI 옵션
-ai_options = {
-    "로컬 AI (무료)": "local",
-    "OpenAI GPT-3.5": "openai"
-}
-
-selected_model = st.selectbox(
-    "사용할 AI 모델을 선택하세요",
-    list(ai_options.keys())
-)
-
-# API 키 입력 (OpenAI 선택시만)
-if selected_model == "OpenAI GPT-3.5":
-    st.warning("💳 OpenAI는 API 키 + 요금 발생")
-    openai_key = st.text_input("OpenAI API 키", type="password")
-else:
-    st.success("✅ 무료 로컬 AI 선택됨!")
-    openai_key = ""
-
-st.markdown("---")
-st.subheader("📝 블로그 글 생성")
-
-# 트렌딩 키워드 시스템
-st.markdown("---")
-st.subheader("🔥 트렌딩 키워드 선택")
-
-# 2025년 실제 트렌딩 키워드 (검색량 기반)
-TRENDING_KEYWORDS = {
-    "AI/기술": ["AI", "챗GPT", "핵융합", "양자컴퓨터", "메타버스", "NFT", "블록체인", "자율주행", "로봇", "드론", "VR", "AR"],
-    "건강": ["혈압관리", "다이어트", "당뇨예방", "면역력강화", "수면장애", "스트레스해소", "허리통증", "탈모방지", "피부관리", "영양제", "운동법", "금연", "금주", "눈건강", "치아관리"],
-    "재테크": ["주식투자", "부동산투자", "비트코인", "이더리움", "적금", "펀드", "부업", "창업", "용돈벌이", "절약팁", "연금", "보험", "세금절약"],
-    "여행": ["국내여행", "해외여행", "캠핑", "맛집", "카페", "독서", "영화추천", "드라마", "홈트레이닝", "요리", "제주도", "부산여행"],
-    "육아교육": ["육아팁", "교육정보", "학습법", "입시", "영어공부", "자격증", "취업", "이직", "코딩교육", "AI교육"],
-    "라이프스타일": ["정리정돈", "인테리어", "패션", "뷰티", "반려동물", "가전제품", "쇼핑", "배달음식", "온라인쇼핑", "미니멀라이프"],
-    "트렌드": ["MZ세대", "ESG", "지속가능", "친환경", "제로웨이스트", "비건", "홈카페", "플렉스", "워라밸", "사이드허슬"]
-}
-
-# 실제 검색량 기반 예상 조회수
-KEYWORD_SEARCH_VOLUME = {
-    "AI": 45000, "챗GPT": 38000, "핵융합": 25000, "다이어트": 89000, "부동산투자": 67000,
-    "비트코인": 78000, "주식투자": 92000, "혈압관리": 34000, "국내여행": 56000, "육아팁": 43000,
-    "MZ세대": 31000, "홈트레이닝": 48000, "제주도": 71000, "영어공부": 52000, "피부관리": 64000
-}
-
-# 계절별 핫 키워드
-import datetime
-current_month = datetime.datetime.now().month
-SEASONAL_HOT = {
-    "겨울": ["다이어트", "운동", "금연", "새해계획", "독감예방", "겨울여행"],
-    "봄": ["봄나들이", "알레르기", "춘곤증", "미세먼지", "벚꽃명소", "봄철건강"],
-    "여름": ["여름휴가", "다이어트", "에어컨", "자외선", "물놀이", "여름철건강"],
-    "가을": ["가을여행", "독감예방", "환절기건강", "단풍명소", "가을운동", "면역력"]
-}
-
-season_key = ["겨울", "봄", "여름", "가을"][((current_month-1)//3)]
-hot_keywords = SEASONAL_HOT[season_key]
-
-# UI 구성
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    keyword_method = st.radio(
-        "키워드 선택 방식:",
-        ["🔥 트렌딩 키워드", "✍️ 직접 입력"]
-    )
-
-with col2:
-    st.info(f"🌟 {season_key}철 HOT 키워드")
-    for hot in hot_keywords[:3]:
-        st.caption(f"• {hot}")
-
-if keyword_method == "🔥 트렌딩 키워드":
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        category = st.selectbox("카테고리 선택", list(TRENDING_KEYWORDS.keys()))
-    
-    with col2:
-        keyword = st.selectbox("세부 키워드", TRENDING_KEYWORDS[category])
-    
-    # 핫 키워드 빠른 선택
-    st.markdown("#### 🌟 이번 달 인기 키워드 (원클릭)")
-    cols = st.columns(len(hot_keywords))
-    for i, hot_keyword in enumerate(hot_keywords):
-        with cols[i]:
-            if st.button(f"🔥 {hot_keyword}", key=f"hot_{i}"):
-                keyword = hot_keyword
-                st.success(f"'{hot_keyword}' 선택됨!")
-
-else:
-    keyword = st.text_input("키워드 직접 입력", placeholder="예: 혈압에 좋은 음식, 투자 비법")
-
-if keyword:
-    st.success(f"✅ 선택된 키워드: **{keyword}**")
-    
-    # 실제 검색량 기반 예상 조회수 계산
-    base_volume = KEYWORD_SEARCH_VOLUME.get(keyword, random.randint(15000, 45000))
-    # 계절 보정 (+-20%)
-    seasonal_multiplier = random.uniform(0.8, 1.2)
-    estimated_views = int(base_volume * seasonal_multiplier)
-
-    # 트렌드 상태 결정
-    if estimated_views > 50000:
-        trend_status = "🔥 급상승"
-    elif estimated_views > 30000:
-        trend_status = "📈 상승"
-    else:
-        trend_status = "📊 안정"
-
-    st.info(f"📊 예상 월 조회수: {estimated_views:,}회 | {trend_status}")
-# 계절 보정 (+-20%)
-seasonal_multiplier = random.uniform(0.8, 1.2)
-estimated_views = int(base_volume * seasonal_multiplier)
-
-# 트렌드 상태 결정
-if estimated_views > 50000:
-    trend_status = "🔥 급상승"
-elif estimated_views > 30000:
-    trend_status = "📈 상승"
-else:
-    trend_status = "📊 안정"
-
-st.info(f"📊 예상 월 조회수: {estimated_views:,}회 | {trend_status}")
-
-# 고품질 블로거 스타일 옵션
-st.subheader("✨ 개인 블로거 스타일 설정")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    blogger_type = st.selectbox(
-        "블로거 유형 선택",
-        ["자동 선택 (추천)", "건강관리사", "헬스트레이너", "약사", "주부블로거"]
-    )
-
-with col2:
-    writing_mood = st.selectbox(
-        "글 분위기 선택", 
-        ["자연스러운 일상톤", "전문적이지만 친근", "솔직한 경험 공유", "따뜻한 조언톤"]
-    )
-
-# 고급 옵션
-with st.expander("🔧 고급 설정 (선택사항)"):
-    include_failure = st.checkbox("실패담/시행착오 포함", value=True)
-    include_local_info = st.checkbox("지역 특화 정보 포함", value=True) 
-    include_season_info = st.checkbox("계절별 맞춤 정보 포함", value=True)
-    include_personal_data = st.checkbox("구체적 수치/데이터 포함", value=True)
-
-# 설정 요약 표시
-st.info(f"💡 설정 요약: {blogger_type} 스타일 + {writing_mood} + 개인화 요소들")
-
-    # 블로그 글 구조 상수 정의
-BLOG_STRUCTURES = [
-    "문제-해결형",
-    "방법론-중심형",
-    "경험-공유형",
-    "비교-분석형",
-    "순위-리스트형",
-    "Q&A형",
-    "가이드-튜토리얼형",
-    "체크리스트형"
-]
-
-def get_smart_persona(keyword):
     """키워드에 맞는 스마트한 페르소나 생성"""
     personas = {
         "건강_의사": {
@@ -2317,7 +1823,7 @@ if 'generated_content' in st.session_state:
         clean_content = re.sub(r'\n\n+', '\n\n', clean_content)
         
         # 복사 버튼들
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(3)
         with col1:
             if st.button("📋 전체 복사", use_container_width=True, key="naver_copy"):
                 st.balloons()
@@ -2396,14 +1902,14 @@ if 'generated_content' in st.session_state:
                         time.sleep(2)
                         
                         st.success("🎉 네이버 블로그 업로드 완료!")
-                        st.info(f"📝 제목: {title}")
-                        st.info(f"🔗 블로그 주소: https://blog.naver.com/{blog_id}")
+                        st.info("📝 제목: " + title)
+                        st.info("🔗 블로그 주소: https://blog.naver.com/" + blog_id)
                         
-                        # 업로드 상태 저장
-                        st.session_state['naver_uploaded'] = True
+                        # 포스팅 상태 저장
+                        st.session_state['naver_posted'] = True
                         
                     except Exception as e:
-                        st.error("❌ 업로드 실패")
+                        st.error("❌ 포스팅 실패")
                         st.warning("💡 현재는 시뮬레이션 모드입니다. 실제 업로드를 위해서는 네이버 API 연동이 필요합니다.")
         else:
             st.warning("⚠️ 네이버 계정 정보를 모두 입력해주세요!")
