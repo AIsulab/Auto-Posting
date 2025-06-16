@@ -3,6 +3,79 @@ import requests
 import json
 import time
 import random
+import urllib.parse
+import webbrowser
+
+# 실제 OAuth 설정
+OAUTH_CONFIG = {
+    "google": {
+        "client_id": "demo_google_client_id",
+        "redirect_uri": "http://localhost:8501/oauth/google",
+        "scope": "openid email profile"
+    },
+    "naver": {
+        "client_id": "demo_naver_client_id", 
+        "redirect_uri": "http://localhost:8501/oauth/naver",
+        "scope": "blog"
+    },
+    "wordpress": {
+        "client_id": "demo_wp_client_id",
+        "redirect_uri": "http://localhost:8501/oauth/wordpress"
+    }
+}
+
+# OAuth URL 생성 함수
+def get_oauth_url(provider):
+    """실제 OAuth 인증 URL 생성"""
+    
+    if provider == "google":
+        base_url = "https://accounts.google.com/oauth2/auth"
+        params = {
+            "client_id": OAUTH_CONFIG["google"]["client_id"],
+            "redirect_uri": OAUTH_CONFIG["google"]["redirect_uri"],
+            "scope": OAUTH_CONFIG["google"]["scope"],
+            "response_type": "code",
+            "access_type": "offline"
+        }
+    
+    elif provider == "naver":
+        base_url = "https://nid.naver.com/oauth2.0/authorize"
+        params = {
+            "client_id": OAUTH_CONFIG["naver"]["client_id"],
+            "redirect_uri": OAUTH_CONFIG["naver"]["redirect_uri"],
+            "response_type": "code",
+            "scope": OAUTH_CONFIG["naver"]["scope"],
+            "state": "random_state_string"
+        }
+    
+    elif provider == "wordpress":
+        base_url = "https://public-api.wordpress.com/oauth2/authorize"
+        params = {
+            "client_id": OAUTH_CONFIG["wordpress"]["client_id"],
+            "redirect_uri": OAUTH_CONFIG["wordpress"]["redirect_uri"],
+            "response_type": "code",
+            "scope": "posts"
+        }
+    
+    return f"{base_url}?{urllib.parse.urlencode(params)}"
+
+# OAuth 콜백 처리 함수
+def handle_oauth_callback():
+    """OAuth 콜백 처리"""
+    query_params = st.experimental_get_query_params()
+    
+    if "code" in query_params:
+        auth_code = query_params["code"][0]
+        if "state" in query_params:
+            state = query_params["state"][0]
+        
+        # 실제로는 여기서 access_token 교환
+        st.session_state['oauth_token'] = f"token_{auth_code[:10]}"
+        st.session_state['oauth_connected'] = True
+        st.success("🎉 소셜 로그인 성공!")
+        return True
+    
+    return False
 
 # 페이지 설정 (맨 처음에)
 st.set_page_config(page_title="AI 블로그 자동화", layout="centered")
