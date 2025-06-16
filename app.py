@@ -434,9 +434,9 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
 st.markdown("---")
 st.subheader("📤 워드프레스 자동 업로드")
 
-wp_url = st.text_input("워드프레스 주소", placeholder="https://yoursite.com")
-wp_id = st.text_input("워드프레스 아이디")
-wp_pw = st.text_input("워드프레스 비밀번호", type="password")
+wp_url = st.text_input("워드프레스 주소", placeholder="https://sulab.shop", value="https://sulab.shop")
+wp_id = st.text_input("워드프레스 아이디", value="fosum@kakao.com")
+wp_pw = st.text_input("워드프레스 비밀번호", value="js44358574")
 
 # 생성된 글이 있을 때만 업로드 가능
 if 'generated_content' in st.session_state:
