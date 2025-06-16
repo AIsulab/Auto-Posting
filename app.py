@@ -6,6 +6,64 @@ import random
 import urllib.parse
 import webbrowser
 
+# 전문가별 인사말과 전문성 표현
+greetings = {
+    "건강_의사": "안녕하세요, 가정의학과 전문의입니다.",
+    "운동_트레이너": "안녕하세요, 현직 퍼스널 트레이너입니다.",
+    "요리_셰프": "안녕하세요, 건강식 전문 요리사입니다.",
+    "공부_교사": "안녕하세요, 진로상담 전문 교사입니다.",
+    "직장_멘토": "안녕하세요, 커리어 코치입니다."
+}
+
+expertise = {
+    "건강_의사": "의학적 근거를 바탕으로",
+    "운동_트레이너": "과학적인 운동 원리를 기반으로",
+    "요리_셰프": "전문 요리사의 노하우로",
+    "공부_교사": "교육 전문가의 관점에서",
+    "직장_멘토": "풍부한 실무 경험을 바탕으로"
+}
+
+def get_current_season():
+    """현재 계절 반환"""
+    month = time.localtime().tm_mon
+    if 3 <= month <= 5:
+        return "봄"
+    elif 6 <= month <= 8:
+        return "여름"
+    elif 9 <= month <= 11:
+        return "가을"
+    else:
+        return "겨울"
+
+def generate_local_blog(keyword, hook_style):
+    """고품질 개인 블로거 스타일 글 생성"""
+    
+    # 랜덤 페르소나 선택
+    persona_name, persona = get_smart_persona(keyword)
+    
+    # 기본 변수 설정
+    current_season = get_current_season()
+    structure = random.choice(BLOG_STRUCTURES)
+    success_rate = random.randint(78, 94)
+    period_weeks = random.randint(2, 8)
+    people_count = random.randint(100, 500)
+    
+    # 무료 이미지 가져오기
+    images = get_free_images(keyword, 3)
+    
+    # 개인적 경험담 생성
+    personal_exp = generate_personal_experience(keyword, persona, persona_name)
+    
+    # 시작 스타일 선택
+    if structure == "개인_경험담_중심":
+        start_style = f"{personal_exp}\n\n그때 정말 깨달았어요. {keyword}이(가) 얼마나 중요한지를..."
+    elif structure == "실패담_중심":
+        start_style = f"처음에는 저도 {keyword}에 대해 잘못 알고 있었어요."
+    elif structure == "Q&A_형식":
+        start_style = f"많은 분들이 {keyword}에 대해 자주 물어보시는 질문들이 있어요."
+    else:
+        start_style = f"{expertise[persona_name]}, {keyword}에 대해서는 정말 할 말이 많아요."
+
 # 실제 OAuth 설정
 OAUTH_CONFIG = {
     "google": {
