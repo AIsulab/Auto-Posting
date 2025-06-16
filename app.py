@@ -13,14 +13,16 @@ if not st.session_state['login_ok']:
     st.title("대표님 전용 블로그 자동화 로그인")
     user_id = st.text_input("아이디")
     user_pw = st.text_input("비밀번호", type="password")
+    
+    # 로그인 버튼 클릭
     if st.button("로그인"):
         if user_id == VALID_ID and user_pw == VALID_PW:
             st.session_state['login_ok'] = True
             st.success("로그인 성공! 자동화 프로그램을 시작합니다.")
-            st.experimental_rerun()  # 페이지 새로 고침을 통해 상태 업데이트
+            st.experimental_set_query_params()  # 쿼리 파라미터 초기화
         else:
             st.error("아이디/비밀번호가 틀렸습니다.")
-    st.stop()
+    st.stop()  # 로그인 화면에서 멈춤
 
 # 로그인 후 본문 코드 (AI 자동화 등)
 st.set_page_config(page_title="AI 통합 블로그 자동화", layout="centered")
