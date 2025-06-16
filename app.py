@@ -2,10 +2,9 @@ import streamlit as st
 import requests
 import pyotp
 
-########## 1. 로그인 & 구글 OTP 2차 인증 ##########
-VALID_ID = "aisulab"         # 원하는 아이디로 변경
-VALID_PW = "!js44358574"   # 원하는 비밀번호로 변경
-TOTP_SECRET = "JBSWY3DPEHPK3PXP"  # 구글 OTP 앱에 등록할 시크릿(16자 영문대문자+숫자, 자유변경 가능)
+VALID_ID = "myid"
+VALID_PW = "mysecretpw"
+TOTP_SECRET = "JBSWY3DPEHPK3PXP"
 
 if 'login_ok' not in st.session_state:
     st.session_state['login_ok'] = False
@@ -20,7 +19,7 @@ if not st.session_state['login_ok']:
     if st.button("로그인"):
         if user_id == VALID_ID and user_pw == VALID_PW:
             st.session_state['login_ok'] = True
-            st.experimental_rerun()
+            st.success("로그인 성공! 아래 2차 인증을 진행하세요.")
         else:
             st.error("아이디/비밀번호가 틀렸습니다.")
     st.stop()
@@ -34,14 +33,13 @@ if not st.session_state['otp_ok']:
         if totp.verify(otp_input):
             st.session_state['otp_ok'] = True
             st.success("2차 인증 성공! 자동화 프로그램 시작")
-            st.experimental_rerun()
         else:
             st.error("OTP 코드가 일치하지 않습니다.")
     st.info("구글 OTP 앱에 아래 시크릿을 등록하세요 (앱에서 '설정 키 입력' 선택):")
     st.code(TOTP_SECRET)
     st.stop()
 
-########## 2. 본문 - AI 자동화 블로그 툴 ##########
+# 아래부터 기존 본문 코드 (AI 자동화 등)
 st.set_page_config(page_title="AI 통합 블로그 자동화", layout="centered")
 st.title("AI 자동 건강 블로그 생성 · 워드프레스 자동 업로드")
 
@@ -55,10 +53,7 @@ st.markdown(
     """
 )
 
-# 1. 키워드 입력
 keyword = st.text_input("블로그 주제/키워드", placeholder="예: 혈압 낮추는 음식, 탈모 예방, 건강검진 준비")
-
-# 2. OpenAI API 키 입력
 openai_key = st.text_input("OpenAI API 키", type="password", help="https://platform.openai.com/api-keys 에서 발급")
 
 ai_content = ""
@@ -98,7 +93,6 @@ wp_url = st.text_input("워드프레스 주소 (https://로 시작)", key="wp_ur
 wp_id = st.text_input("워드프레스 아이디", key="wp_user")
 wp_pw = st.text_input("워드프레스 비밀번호", type="password", key="wp_pw")
 
-# 글 제목/본문 자동 추출
 auto_title = ""
 auto_content = ""
 if ai_content:
