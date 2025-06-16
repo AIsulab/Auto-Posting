@@ -380,7 +380,7 @@ def generate_local_blog(keyword, hook_style):
     """고품질 개인 블로거 스타일 글 생성"""
     
     # 랜덤 페르소나 선택
-    persona_name, persona = get_random_persona()
+    persona_name, persona = get_smart_persona(keyword)
     structure = random.choice(BLOG_STRUCTURES)
     
     # 무료 이미지 가져오기
