@@ -1,16 +1,12 @@
 import streamlit as st
 import requests
-import pyotp
 
 VALID_ID = "aisulab"
 VALID_PW = "!js44358574"
-TOTP_SECRET = "JBSWY3DPEHPK3PXP"
 
 # 세션 상태 초기화
 if 'login_ok' not in st.session_state:
     st.session_state['login_ok'] = False
-if 'otp_ok' not in st.session_state:
-    st.session_state['otp_ok'] = False
 
 # 1차 로그인
 if not st.session_state['login_ok']:
@@ -20,29 +16,13 @@ if not st.session_state['login_ok']:
     if st.button("로그인"):
         if user_id == VALID_ID and user_pw == VALID_PW:
             st.session_state['login_ok'] = True
-            st.success("로그인 성공! 아래 2차 인증을 진행하세요.")
+            st.success("로그인 성공! 자동화 프로그램을 시작합니다.")
             st.experimental_rerun()  # 페이지 새로 고침
         else:
             st.error("아이디/비밀번호가 틀렸습니다.")
     st.stop()
 
-# 2차(OTP) 인증
-if st.session_state['login_ok'] and not st.session_state['otp_ok']:
-    st.title("2차 인증(구글 OTP)")
-    totp = pyotp.TOTP(TOTP_SECRET)
-    otp_input = st.text_input("구글 OTP 앱에 뜨는 6자리 코드 입력")
-    if st.button("인증하기"):
-        if totp.verify(otp_input):
-            st.session_state['otp_ok'] = True
-            st.success("2차 인증 성공! 자동화 프로그램 시작")
-            st.experimental_rerun()  # 페이지 새로 고침
-        else:
-            st.error("OTP 코드가 일치하지 않습니다.")
-    st.info("구글 OTP 앱에 아래 시크릿을 등록하세요 (앱에서 '설정 키 입력' 선택):")
-    st.code(TOTP_SECRET)
-    st.stop()
-
-# 아래부터 본문 코드 (AI 자동화 등)
+# 로그인 후 본문 코드 (AI 자동화 등)
 st.set_page_config(page_title="AI 통합 블로그 자동화", layout="centered")
 st.title("AI 자동 건강 블로그 생성 · 워드프레스 자동 업로드")
 
@@ -115,7 +95,7 @@ if st.button("워드프레스로 글 업로드"):
         try:
             res = requests.post(api_url, json=data, auth=(wp_id, wp_pw))
             if res.status_code == 201:
-                st.success("워드프레스를 업로드 성공!")
+                st.success("워드프레스 업로드 성공!")
             else:
                 st.error(f"워드프레스 오류: {res.status_code}, {res.text}")
         except Exception as e:
