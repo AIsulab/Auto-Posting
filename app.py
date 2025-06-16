@@ -541,9 +541,9 @@ upload_method = st.radio(
 )
 
 if upload_method == "직접 입력":
-    wp_url = st.text_input("워드프레스 주소", placeholder="https://sulab.shop", value="https://sulab.shop")
-    wp_id = st.text_input("워드프레스 아이디", value="fosum@kakao.com")
-    wp_pw = st.text_input("워드프레스 비밀번호", type="password")
+    wp_url = st.text_input("워드프레스 주소", placeholder="http://sulab.shop", value="http://sulab.shop")
+    wp_id = st.text_input("워드프레스 아이디", value="aisulab")
+    wp_pw = st.text_input("워드프레스 비밀번호", vlaue="JxAb 8Xos SfZe Mb9n XNMo Bhdq")
     
 elif upload_method == "소셜 로그인":
     st.info("🔐 소셜 로그인으로 간편하게 연결하세요!")
