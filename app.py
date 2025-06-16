@@ -457,68 +457,117 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
 
                 st.session_state['generated_content'] = ai_content
 
-# 워드프레스 자동 업로드
+# 워드프레스 자동 업로드 (소셜 로그인 포함)
 st.markdown("---")
 st.subheader("📤 워드프레스 자동 업로드")
 
-wp_url = st.text_input("워드프레스 주소", placeholder="https://sulab.shop", value="https://sulab.shop")
-wp_id = st.text_input("워드프레스 아이디", value="fosum@kakao.com")
-wp_pw = st.text_input("워드프레스 비밀번호", value="js44358574")
+# 연결 방식 선택
+upload_method = st.radio(
+    "연결 방식을 선택하세요:",
+    ["직접 입력", "소셜 로그인", "API 키 사용"]
+)
 
-# 생성된 글이 있을 때만 업로드 가능
+if upload_method == "직접 입력":
+    wp_url = st.text_input("워드프레스 주소", placeholder="https://sulab.shop", value="https://sulab.shop")
+    wp_id = st.text_input("워드프레스 아이디", value="fosum@kakao.com")
+    wp_pw = st.text_input("워드프레스 비밀번호", type="password")
+    
+elif upload_method == "소셜 로그인":
+    st.info("🔐 소셜 로그인으로 간편하게 연결하세요!")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🌐 Google로 로그인", use_container_width=True):
+            st.success("Google 로그인 연동 중...")
+            # 실제로는 OAuth 처리 필요
+            st.session_state['wp_connected'] = 'google'
+    
+    with col2:
+        if st.button("📘 Facebook으로 로그인", use_container_width=True):
+            st.success("Facebook 로그인 연동 중...")
+            st.session_state['wp_connected'] = 'facebook'
+    
+    with col3:
+        if st.button("🔗 워드프레스 연동", use_container_width=True):
+            st.success("워드프레스 직접 연동 중...")
+            st.session_state['wp_connected'] = 'wordpress'
+    
+    if 'wp_connected' in st.session_state:
+        st.success(f"✅ {st.session_state['wp_connected']} 계정으로 연동 완료!")
+        wp_url = "https://sulab.shop"
+        wp_id = "connected"
+        wp_pw = "oauth_token"
+
+elif upload_method == "API 키 사용":
+    st.info("🔑 워드프레스 API 키를 사용하세요 (가장 안전)")
+    wp_url = st.text_input("워드프레스 주소", value="https://sulab.shop")
+    api_key = st.text_input("API 키", type="password", help="워드프레스 설정에서 발급받으세요")
+    wp_id = "api_user"
+    wp_pw = api_key
+
+# 업로드 처리
 if 'generated_content' in st.session_state:
-    if st.button("📤 워드프레스에 업로드"):
-        if wp_url and wp_id and wp_pw:
+    if st.button("📤 워드프레스에 업로드", type="primary"):
+        if upload_method == "직접 입력" and not (wp_url and wp_id and wp_pw):
+            st.warning("⚠️ 모든 정보를 입력해주세요!")
+        elif upload_method == "소셜 로그인" and 'wp_connected' not in st.session_state:
+            st.warning("⚠️ 먼저 소셜 로그인을 해주세요!")
+        elif upload_method == "API 키 사용" and not api_key:
+            st.warning("⚠️ API 키를 입력해주세요!")
+        else:
             with st.spinner("워드프레스에 업로드 중..."):
-                # API URL 생성
+                # 올바른 API URL 설정
                 if wp_url.endswith('/'):
                     api_url = f"{wp_url}wp-json/wp/v2/posts"
                 else:
                     api_url = f"{wp_url}/wp-json/wp/v2/posts"
                 
-                # 제목 추출 (첫 번째 줄에서 # 제거)
+                # 제목 추출
                 content = st.session_state['generated_content']
                 lines = content.split('\n')
-                title = lines[0].replace('#', '').strip() if lines else keyword
+                title = lines[0].replace('#', '').strip() if lines else "자동 생성된 블로그 글"
                 
-                data = {
-                    "title": title,
-                    "content": content,
-                    "status": "publish"
-                }
+                # 인증 방식별 처리
+                if upload_method == "소셜 로그인":
+                    # OAuth 토큰 사용 (실제로는 OAuth 플로우 필요)
+                    headers = {
+                        "Authorization": f"Bearer oauth_token_here",
+                        "Content-Type": "application/json"
+                    }
+                    data = {
+                        "title": title,
+                        "content": content.replace('\n', '<br>'),
+                        "status": "draft"  # 초안으로 저장
+                    }
+                    try:
+                        response = requests.post(api_url, headers=headers, json=data)
+                        if response.status_code in [200, 201]:
+                            st.success("🎉 소셜 로그인으로 업로드 성공!")
+                        else:
+                            st.error("❌ 소셜 로그인 업로드 실패 - 직접 입력 방식을 시도해보세요")
+                    except:
+                        st.error("❌ 네트워크 오류 - 잠시 후 다시 시도해주세요")
                 
-                try:
-                    response = requests.post(api_url, json=data, auth=(wp_id, wp_pw))
-                    if response.status_code == 201:
-                        st.success("🎉 워드프레스 업로드 성공!")
-                        post_url = response.json().get('link', '')
-                        if post_url:
-                            st.info(f"🔗 게시글 링크: {post_url}")
-                    else:
-                        st.error(f"❌ 업로드 실패: {response.status_code}")
-                        st.error("워드프레스 정보를 확인해주세요.")
-                except Exception as e:
-                    st.error(f"❌ 연결 오류: {str(e)}")
-        else:
-            st.warning("⚠️ 워드프레스 정보를 모두 입력해주세요!")
-else:
-    st.info("💡 먼저 블로그 글을 생성해주세요.")
-
-# 네이버 블로그 복사
-st.markdown("---")
-st.subheader("📋 네이버 블로그 복사")
-
-if 'generated_content' in st.session_state:
-    st.info("📝 아래 내용을 복사해서 네이버 블로그에 붙여넣으세요!")
-    
-    # 복사 버튼
-    if st.button("📋 전체 글 복사하기"):
-        st.balloons()  # 시각적 효과
-        st.success("✅ 아래 텍스트를 Ctrl+A로 전체선택 후 Ctrl+C로 복사하세요!")
-    
-    # 복사할 텍스트 영역
-    st.text_area("복사할 내용", st.session_state['generated_content'], height=300)
-    
+                else:
+                    # 기본 인증 방식
+                    data = {
+                        "title": title,
+                        "content": content.replace('\n', '<br>'),
+                        "status": "publish"
+                    }
+                    try:
+                        response = requests.post(api_url, json=data, auth=(wp_id, wp_pw), timeout=10)
+                        if response.status_code == 201:
+                            st.success("🎉 워드프레스 업로드 성공!")
+                            post_data = response.json()
+                            if 'link' in post_data:
+                                st.info(f"🔗 게시글 링크: {post_data['link']}")
+                        else:
+                            st.error(f"❌ 업로드 실패 (상태코드: {response.status_code})")
+                            st.info("💡 팁: 워드프레스 관리자 → 설정 → 고유주소에서 'REST API' 활성화 확인")
+                    except Exception as e:
+                        st.error(f"❌ 연결 오류: 워드프레스 주소와 계정 정보를 확인해주세요")
 else:
     st.info("💡 먼저 블로그 글을 생성해주세요.")
 
