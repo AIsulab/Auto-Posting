@@ -38,7 +38,52 @@ def get_current_season():
 def generate_local_blog(keyword, hook_style):
     """고품질 개인 블로거 스타일 글 생성"""
     
-    # 랜덤 페르소나 선택
+    # ===== 5단계 + 6단계: 여기부터 추가 =====
+    def detect_keyword_category(keyword):
+        """키워드에서 카테고리 자동 감지"""
+        ai_keywords = ["AI", "인공지능", "챗GPT", "로봇", "자동화", "머신러닝", "딥러닝"]
+        health_keywords = ["건강", "다이어트", "운동", "혈압", "당뇨", "면역력", "영양", "의료"]
+        finance_keywords = ["투자", "재테크", "주식", "부동산", "비트코인", "펀드", "적금", "대출"]
+        
+        if any(ai_word in keyword for ai_word in ai_keywords):
+            return "AI/기술"
+        elif any(health_word in keyword for health_word in health_keywords):
+            return "건강"  
+        elif any(finance_word in keyword for finance_word in finance_keywords):
+            return "재테크"
+        else:
+            return "라이프스타일"
+    
+    # 키워드별 자연스러운 도입부 패턴
+    KEYWORD_INTROS = {
+        "AI/기술": [
+            f"요즘 {keyword}에 대한 관심이 폭발적으로 늘어나고 있죠.",
+            f"제가 {keyword} 분야에서 일하면서 가장 많이 받는 질문들을 정리해봤어요.",
+            f"{keyword} 트렌드가 빠르게 변하면서 헷갈리는 분들이 많더라고요.",
+            f"{current_season}이 되면서 {keyword} 관련 질문들이 정말 많아졌어요."
+        ],
+        
+        "건강": [
+            f"{current_season}이 되니까 {keyword} 관련 문의가 정말 많아졌어요.",
+            f"병원에서 {keyword} 때문에 오시는 분들이 늘어나고 있어요.",
+            f"제 주변에서도 {keyword} 고민하시는 분들이 정말 많아요."
+        ],
+        
+        "재테크": [
+            f"요즘 {keyword}에 대한 관심이 뜨거워지고 있죠.",
+            f"{current_season} 들어서 {keyword} 상담 요청이 부쩍 늘었어요.",
+            f"경제 상황이 변하면서 {keyword}에 대한 문의가 많아졌어요."
+        ],
+        
+        "라이프스타일": [
+            f"{current_season}이 되니까 {keyword}에 대한 관심이 많아졌어요.",
+            f"요즘 {keyword} 관련해서 문의가 정말 많이 들어와요.",
+            f"제 주변에서도 {keyword}에 대해 궁금해하시는 분들이 많더라고요."
+        ]
+    }
+    # ===== 여기까지 추가 =====
+    
+    # 랜덤 페르소나 선택 (기존 코드 그대로)
     persona_name, persona = get_smart_persona(keyword)
     
     # 기본 변수 설정
