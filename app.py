@@ -83,7 +83,55 @@ PIXABAY_API_KEY = "demo"   # 무료 사용
 
 # 무료 이미지 검색 함수
 def get_free_images(keyword, count=3):
-    """키워드 연관 무료 이미지 가져오기"""
+    """안정적인 무료 이미지 URL 생성"""
+    images = []
+    
+    # 키워드별 특화된 Unsplash 이미지 (안정적인 URL)
+    keyword_images = {
+        "혈압": [
+            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
+            "https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&h=400&fit=crop", 
+            "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=600&h=400&fit=crop"
+        ],
+        "음식": [
+            "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&h=400&fit=crop",
+            "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&h=400&fit=crop",
+            "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop"
+        ],
+        "건강": [
+            "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop",
+            "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&h=400&fit=crop",
+            "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=600&h=400&fit=crop"
+        ],
+        "다이어트": [
+            "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop",
+            "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=600&h=400&fit=crop",
+            "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop"
+        ]
+    }
+    
+    # 기본 건강 관련 이미지
+    default_images = [
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=600&h=400&fit=crop"
+    ]
+    
+    # 키워드 매칭
+    selected_images = default_images
+    for category in keyword_images:
+        if category in keyword:
+            selected_images = keyword_images[category]
+            break
+    
+    # 이미지 URL 생성
+    for i in range(min(count, len(selected_images))):
+        images.append({
+            "url": selected_images[i],
+            "alt": f"{keyword} 관련 {['시작', '중간', '마무리'][i]} 이미지"
+        })
+    
+    return images
     images = []
     
     # 키워드별 특화 이미지 매핑
