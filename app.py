@@ -1282,10 +1282,19 @@ if 'generated_content' in st.session_state:
                         "Authorization": f"Bearer oauth_token_here",
                         "Content-Type": "application/json"
                     }
+                    # 마크다운 이미지를 HTML로 변환
+                    import re
+                    def convert_images_to_html(content):
+                        pattern = r'!\[(.*?)\]\((.*?)\)'
+                        replacement = r'<img src="\2" alt="\1" style="width:100%; max-width:600px; height:auto; margin:20px 0; border-radius:8px; display:block;">'
+                        return re.sub(pattern, replacement, content)
+                    
+                    # HTML 변환 후 업로드
+                    html_content = convert_images_to_html(content)
                     data = {
                         "title": title,
-                        "content": content.replace('\n', '<br>'),
-                        "status": "draft"  # 초안으로 저장
+                        "content": html_content.replace('\n', '<br>'),
+                        "status": "publish"
                     }
                     try:
                         response = requests.post(api_url, headers=headers, json=data)
