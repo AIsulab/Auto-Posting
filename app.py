@@ -145,94 +145,76 @@ VALID_PW = "!js44358574"
 import random
 from datetime import datetime, timedelta
 
-# 다양한 블로거 페르소나 정의
+# 다양한 블로거 페르소나 정의 (20가지)
 BLOGGER_PERSONAS = {
-    "건강관리사_김민지": {
-        "age": 32,
-        "job": "병원 영양사",
-        "location": "서울 강남구",
-        "experience": "7년차",
-        "style": "전문적이지만 친근한",
-        "specialty": ["영양관리", "다이어트", "성인병 예방"],
-        "backstory": "대학병원에서 환자들 상담하면서 터득한 노하우"
-    },
-    "헬스트레이너_박준호": {
-        "age": 28,
-        "job": "개인 PT 트레이너",
-        "location": "부산 해운대구", 
-        "experience": "5년차",
-        "style": "열정적이고 동기부여",
-        "specialty": ["운동법", "근력운동", "체중관리"],
-        "backstory": "본인도 90kg에서 70kg 감량 성공한 경험"
-    },
-    "약사_이수현": {
-        "age": 35,
-        "job": "동네 약국 약사",
-        "location": "대구 수성구",
-        "experience": "10년차",
-        "style": "꼼꼼하고 신중한",
-        "specialty": ["건강기능식품", "약물 상호작용", "건강상식"],
-        "backstory": "매일 고객 상담하며 쌓은 실무 경험"
-    },
-    "주부_최은영": {
-        "age": 41,
-        "job": "전업주부 (前 간호사)",
-        "location": "인천 연수구",
-        "experience": "가족 건강관리 15년",
-        "style": "따뜻하고 엄마같은",
-        "specialty": ["가족건강", "아이들 영양", "중년건강"],
-        "backstory": "간호사 출신으로 가족 건강 챙기는 노하우"
-    }
+    "건강관리사_김민지": {"age": 32, "job": "병원 영양사", "location": "서울 강남구", "experience": "7년차"},
+    "헬스트레이너_박준호": {"age": 28, "job": "개인 PT 트레이너", "location": "부산 해운대구", "experience": "5년차"},
+    "약사_이수현": {"age": 35, "job": "동네 약국 약사", "location": "대구 수성구", "experience": "10년차"},
+    "주부_최은영": {"age": 41, "job": "전업주부 (前 간호사)", "location": "인천 연수구", "experience": "15년"},
+    "운동강사_이민수": {"age": 26, "job": "필라테스 강사", "location": "광주 서구", "experience": "3년차"},
+    "한의사_박소영": {"age": 38, "job": "한방병원 원장", "location": "전주 완산구", "experience": "12년차"},
+    "간호사_김태현": {"age": 29, "job": "대학병원 간호사", "location": "울산 남구", "experience": "6년차"},
+    "요가강사_정미래": {"age": 31, "job": "요가스튜디오 대표", "location": "수원 영통구", "experience": "8년차"},
+    "물리치료사_조현우": {"age": 34, "job": "재활병원 물리치료사", "location": "청주 흥덕구", "experience": "9년차"},
+    "피트니스코치_안서연": {"age": 27, "job": "크로스핏 코치", "location": "포항 북구", "experience": "4년차"},
+    "영양상담사_송지훈": {"age": 30, "job": "보건소 영양사", "location": "천안 동남구", "experience": "7년차"},
+    "재활트레이너_홍예진": {"age": 33, "job": "스포츠 재활 전문가", "location": "창원 의창구", "experience": "11년차"},
+    "건강관리사_류민호": {"age": 39, "job": "직장 보건관리자", "location": "고양 일산서구", "experience": "13년차"},
+    "다이어트코치_윤하늘": {"age": 25, "job": "온라인 다이어트 코치", "location": "성남 분당구", "experience": "2년차"},
+    "헬스케어매니저_임도현": {"age": 36, "job": "웰니스센터 매니저", "location": "제주 제주시", "experience": "10년차"},
+    "운동처방사_노승아": {"age": 42, "job": "운동처방 전문의", "location": "춘천 춘천시", "experience": "16년차"},
+    "식이상담사_강보람": {"age": 28, "job": "임상영양사", "location": "원주 원주시", "experience": "5년차"},
+    "주부블로거_문지영": {"age": 37, "job": "육아맘 (前 체육교사)", "location": "안산 단원구", "experience": "12년"},
+    "스포츠강사_황석진": {"age": 29, "job": "수영 강사", "location": "목포 목포시", "experience": "6년차"},
+    "웰니스코치_서예린": {"age": 40, "job": "기업 웰니스 컨설턴트", "location": "경주 경주시", "experience": "14년차"}
 }
 
-# 글 구조 패턴 (20가지)
-BLOG_STRUCTURES = [
-    "개인_경험담_중심",
-    "전문가_인터뷰_형식", 
-    "단계별_가이드",
-    "Q&A_형식",
-    "비교_분석_형식",
-    "실패담_중심",
-    "성공사례_모음",
-    "계절별_맞춤_정보",
-    "연령대별_조언",
-    "오해와_진실",
-    "최신_연구_분석",
-    "실제_사례_중심",
-    "체크리스트_형식",
-    "일기_형식",
-    "편지_형식",
-    "대화_형식",
-    "리뷰_형식",
-    "분석_리포트_형식",
-    "생활밀착_팁",
-    "트렌드_분석"
-]
+# 랜덤 이름 생성기
+RANDOM_NAMES = ["김○○", "이○○", "박○○", "최○○", "정○○", "강○○", "조○○", "윤○○", "임○○", "한○○", 
+                "오○○", "서○○", "신○○", "권○○", "황○○", "안○○", "송○○", "류○○", "전○○", "홍○○"]
 
-# 랜덤 페르소나 선택 함수
-def get_random_persona():
-    """매번 다른 블로거 페르소나 선택"""
-    persona_name = random.choice(list(BLOGGER_PERSONAS.keys()))
-    return persona_name, BLOGGER_PERSONAS[persona_name]
+# 다양한 상황별 경험담
+EXPERIENCE_TEMPLATES = {
+    "혈압": [
+        "{location}에 사는 {age}대 {gender}분이 혈압 {number}으로 오셨을 때...",
+        "제 {family}가 고혈압으로 {situation} 후 우리 가족이 바뀐 이야기",
+        "{experience} 일하면서 가장 기억에 남는 혈압 관리 성공 사례",
+        "혈압약 없이 관리하겠다며 찾아온 {age}대 {job}분의 놀라운 변화",
+        "{period}개월 전 제가 직접 겪은 혈압 관리 실패담과 성공 스토리"
+    ],
+    "다이어트": [
+        "{weight}kg에서 {target_weight}kg 감량에 성공한 {age}대 {gender}분 사례",
+        "{location} 헬스장에서 만난 회원분의 {period}개월 변화 스토리",
+        "제가 직접 {period}개월간 시도해본 다이어트 솔직 후기",
+        "요요 없이 {years}년째 유지 중인 비결을 알려드려요",
+        "{season}철 다이어트로 {percent}% 성공률을 보인 방법"
+    ]
+}
 
-# 구체적 경험담 생성 함수
-def generate_personal_experience(keyword, persona):
-    """페르소나 기반 개인 경험담 생성"""
-    experiences = {
-        "혈압": [
-            f"{persona['location']}에 사는 50대 남성분이 혈압약 없이 관리하겠다며 찾아오셨을 때...",
-            f"제 아버지가 고혈압으로 쓰러지신 후 우리 가족이 바뀐 이야기를 해드릴게요.",
-            f"병원에서 {persona['experience']} 일하면서 가장 기억에 남는 혈압 관리 성공 사례는..."
-        ],
-        "다이어트": [
-            f"제가 직접 3개월간 시도해본 결과, 정말 효과 있었던 방법을 공유해요.",
-            f"{persona['location']} 헬스장에서 만난 회원분의 놀라운 변화 스토리...",
-            f"15kg 감량 후 요요 없이 2년째 유지 중인 비결을 알려드려요."
-        ]
+def generate_random_experience(keyword, persona):
+    """매번 다른 개인 경험담 생성"""
+    category = "혈압" if "혈압" in keyword else "다이어트"
+    template = random.choice(EXPERIENCE_TEMPLATES[category])
+    
+    # 랜덤 변수들
+    random_vars = {
+        "location": persona['location'],
+        "age": random.choice(["20", "30", "40", "50", "60"]),
+        "gender": random.choice(["남성", "여성"]),
+        "number": random.randint(140, 180),
+        "family": random.choice(["아버지", "어머니", "형", "언니", "동생"]),
+        "situation": random.choice(["쓰러지신", "응급실에 가신", "건강검진에서 발견된"]),
+        "experience": persona['experience'],
+        "job": random.choice(["회사원", "자영업자", "주부", "학생", "교사"]),
+        "period": random.randint(2, 12),
+        "weight": random.randint(70, 95),
+        "target_weight": random.randint(55, 75),
+        "years": random.randint(1, 5),
+        "percent": random.randint(80, 95),
+        "season": random.choice(["봄", "여름", "가을", "겨울"])
     }
     
-    category = "혈압" if "혈압" in keyword else "다이어트" 
-    return random.choice(experiences.get(category, experiences["다이어트"]))
+    return template.format(**random_vars)
 
 # URL에서 로그인 상태 먼저 복원
 if st.query_params.get('logged_in') == 'true':
