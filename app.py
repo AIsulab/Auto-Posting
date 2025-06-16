@@ -20,12 +20,13 @@ if not st.session_state['login_ok']:
         if user_id == VALID_ID and user_pw == VALID_PW:
             st.session_state['login_ok'] = True
             st.success("로그인 성공! 아래 2차 인증을 진행하세요.")
+            st.experimental_rerun()  # 페이지 새로 고침
         else:
             st.error("아이디/비밀번호가 틀렸습니다.")
     st.stop()
 
 # 2차(OTP) 인증
-if not st.session_state['otp_ok']:
+if st.session_state['login_ok'] and not st.session_state['otp_ok']:
     st.title("2차 인증(구글 OTP)")
     totp = pyotp.TOTP(TOTP_SECRET)
     otp_input = st.text_input("구글 OTP 앱에 뜨는 6자리 코드 입력")
@@ -39,7 +40,7 @@ if not st.session_state['otp_ok']:
     st.code(TOTP_SECRET)
     st.stop()
 
-# 아래부터 기존 본문 코드 (AI 자동화 등)
+# 아래부터 본문 코드 (AI 자동화 등)
 st.set_page_config(page_title="AI 통합 블로그 자동화", layout="centered")
 st.title("AI 자동 건강 블로그 생성 · 워드프레스 자동 업로드")
 
@@ -116,7 +117,7 @@ if st.button("워드프레스로 글 업로드"):
             else:
                 st.error(f"워드프레스 오류: {res.status_code}, {res.text}")
         except Exception as e:
-            st.error(f"워드프레스 연동 에러: {e}")
+            st.error(f"워드프레스를 연동하는 중 에러가 발생했습니다: {e}")
 
 st.markdown("---")
 st.subheader("네이버 블로그: 글 복사해서 등록 (공식 API 없음)")
