@@ -229,7 +229,7 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
                 st.text_area("생성된 블로그 글", ai_content, height=400)
                 st.session_state['generated_content'] = ai_content
 
-                    # 워드프레스 자동 업로드
+# 워드프레스 자동 업로드
 st.markdown("---")
 st.subheader("📤 워드프레스 자동 업로드")
 
@@ -241,29 +241,36 @@ wp_pw = st.text_input("워드프레스 비밀번호", type="password")
 if 'generated_content' in st.session_state:
     if st.button("📤 워드프레스에 업로드"):
         if wp_url and wp_id and wp_pw:
-            api_url = f"{wp_url}/wp-json/wp/v2/posts"
-            
-            # 제목 추출 (첫 번째 줄)
-            content = st.session_state['generated_content']
-            lines = content.split('\n')
-            title = lines[0].replace('#', '').strip() if lines else keyword
-            
-            data = {
-                "title": title,
-                "content": content,
-                "status": "publish"
-            }
-            
-            try:
-                response = requests.post(api_url, json=data, auth=(wp_id, wp_pw))
-                if response.status_code == 201:
-                    st.success("🎉 워드프레스 업로드 성공!")
-                else:
-                    st.error(f"업로드 실패: {response.status_code}")
-            except Exception as e:
-                st.error(f"오류 발생: {e}")
+            with st.spinner("워드프레스에 업로드 중..."):
+                api_url = f"{wp_url}/wp-json/wp/v2/posts"
+                
+                # 제목 추출 (첫 번째 줄에서 # 제거)
+                content = st.session_state['generated_content']
+                lines = content.split('\n')
+                title = lines[0].replace('#', '').strip() if lines else keyword
+                
+                data = {
+                    "title": title,
+                    "content": content,
+                    "status": "publish"
+                }
+                
+                try:
+                    response = requests.post(api_url, json=data, auth=(wp_id, wp_pw))
+                    if response.status_code == 201:
+                        st.success("🎉 워드프레스 업로드 성공!")
+                        post_url = response.json().get('link', '')
+                        if post_url:
+                            st.info(f"🔗 게시글 링크: {post_url}")
+                    else:
+                        st.error(f"❌ 업로드 실패: {response.status_code}")
+                        st.error("워드프레스 정보를 확인해주세요.")
+                except Exception as e:
+                    st.error(f"❌ 연결 오류: {str(e)}")
         else:
-            st.warning("모든 정보를 입력해주세요!")
+            st.warning("⚠️ 워드프레스 정보를 모두 입력해주세요!")
+else:
+    st.info("💡 먼저 블로그 글을 생성해주세요.")
 
 # 네이버 블로그 복사
 st.markdown("---")
@@ -271,10 +278,30 @@ st.subheader("📋 네이버 블로그 복사")
 
 if 'generated_content' in st.session_state:
     st.info("📝 아래 내용을 복사해서 네이버 블로그에 붙여넣으세요!")
-    st.code(st.session_state['generated_content'])
     
-    if st.button("📋 클립보드에 복사"):
-        st.success("✅ 클립보드에 복사되었습니다! (수동으로 Ctrl+C 해주세요)")
+    # 복사 버튼
+    if st.button("📋 전체 글 복사하기"):
+        st.balloons()  # 시각적 효과
+        st.success("✅ 아래 텍스트를 Ctrl+A로 전체선택 후 Ctrl+C로 복사하세요!")
+    
+    # 복사할 텍스트 영역
+    st.text_area("복사할 내용", st.session_state['generated_content'], height=300)
+    
+else:
+    st.info("💡 먼저 블로그 글을 생성해주세요.")
 
+# 푸터
 st.markdown("---")
-st.caption("💡 by 대표님의 AI 블로그 자동화 시스템")
+st.markdown("### 💡 사용 통계")
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric("생성된 글", "1개" if 'generated_content' in st.session_state else "0개")
+
+with col2:
+    st.metric("사용 모델", selected_model if 'generated_content' in st.session_state else "미선택")
+
+with col3:
+    st.metric("상태", "완료" if 'generated_content' in st.session_state else "대기중")
+
+st.caption("💡 by 대표님의 AI 블로그 자동화 시스템 | 새로고침해도 로그인 유지됩니다!")
