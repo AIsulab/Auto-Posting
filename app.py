@@ -169,6 +169,32 @@ BLOGGER_PERSONAS = {
     "웰니스코치_서예린": {"age": 40, "job": "기업 웰니스 컨설턴트", "location": "경주 경주시", "experience": "14년차"}
 }
 
+# 키워드별 전문 페르소나 매칭
+KEYWORD_PERSONA_MAPPING = {
+    "건강": ["건강관리사_김민지", "약사_이수현", "간호사_김태현", "주부_최은영"],
+    "운동": ["헬스트레이너_박준호", "운동강사_이민수", "피트니스코치_안서연"],
+    "다이어트": ["헬스트레이너_박준호", "영양상담사_송지훈", "다이어트코치_윤하늘"],
+    "재테크": ["주부블로거_문지영", "웰니스코치_서예린"],
+    "여행": ["주부블로거_문지영", "웰니스코치_서예린"],
+    "육아": ["주부_최은영", "주부블로거_문지영"],
+    "라이프스타일": ["요가강사_정미래", "웰니스코치_서예린"]
+}
+
+def get_smart_persona(keyword):
+    """키워드에 맞는 전문 페르소나 선택"""
+    matched_category = None
+    for category in KEYWORD_PERSONA_MAPPING.keys():
+        if category in keyword:
+            matched_category = category
+            break
+    
+    if matched_category:
+        persona_name = random.choice(KEYWORD_PERSONA_MAPPING[matched_category])
+    else:
+        persona_name = random.choice(list(BLOGGER_PERSONAS.keys()))
+    
+    return persona_name, BLOGGER_PERSONAS[persona_name]
+
 # 랜덤 이름 생성기
 RANDOM_NAMES = ["김○○", "이○○", "박○○", "최○○", "정○○", "강○○", "조○○", "윤○○", "임○○", "한○○", 
                 "오○○", "서○○", "신○○", "권○○", "황○○", "안○○", "송○○", "류○○", "전○○", "홍○○"]
