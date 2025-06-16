@@ -327,6 +327,7 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
         st.warning("⚠️ 키워드를 입력해주세요!")
     else:
         with st.spinner("AI가 매력적인 블로그 글을 작성 중입니다... 📝"):
+            ai_content = None
             
             if selected_model == "OpenAI GPT-3.5":
                 if not openai_key:
@@ -377,6 +378,7 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
 - 구독 유도
 
 2000자 이상, 한국어로 작성해주세요.
+"""
                     
                     headers = {
                         "Authorization": f"Bearer {openai_key}",
@@ -393,62 +395,39 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
                         response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
                         if response.status_code == 200:
                             ai_content = response.json()["choices"][0]["message"]["content"].strip()
-                            st.success("✅ 로컬 AI로 블로그 글 생성 완료!")
-
-# 생성된 이미지들 미리보기
-st.subheader("📸 포함된 이미지들")
-images = get_free_images(keyword, 3)
-
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.image(images[0]['url'], caption="시작 이미지", use_column_width=True)
-with col2:
-    st.image(images[1]['url'], caption="중간 이미지", use_column_width=True)  
-with col3:
-    st.image(images[2]['url'], caption="마무리 이미지", use_column_width=True)
-
-st.info("💡 위 이미지들이 블로그 글에 자동 삽입됩니다!")
-
-# 생성된 글 표시 (마크다운으로)
-st.subheader("📝 생성된 블로그 글 (이미지 포함)")
-st.markdown(ai_content)
-
-# 원본 텍스트도 제공
-with st.expander("📋 텍스트만 복사하기"):
-    st.text_area("텍스트 전용", ai_content, height=300)
-
-st.session_state['generated_content'] = ai_content
+                            st.success("✅ AI로 블로그 글 생성 완료!")
                         else:
                             st.error(f"❌ OpenAI API 오류: {response.status_code}")
                     except Exception as e:
                         st.error(f"❌ 오류 발생: {str(e)}")
-            
             else:
                 # 로컬 AI 사용 (완전 무료)
                 ai_content = generate_local_blog(keyword, hook_style)
-                st.success("✅ OpenAI로 풍부한 블로그 글 생성 완료!")
+                st.success("✅ 로컬 AI로 블로그 글 생성 완료!")
 
-# 랜덤 이미지 표시
-st.subheader("📸 추천 이미지들")
-images = get_free_images(keyword, 3)
+            if ai_content:
+                # 생성된 이미지들 미리보기
+                st.subheader("📸 포함된 이미지들")
+                images = get_free_images(keyword, 3)
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.image(images[0]['url'], caption="헤더 이미지", use_column_width=True)
-with col2:
-    st.image(images[1]['url'], caption="본문 이미지", use_column_width=True)  
-with col3:
-    st.image(images[2]['url'], caption="마무리 이미지", use_column_width=True)
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.image(images[0]['url'], caption="시작 이미지", use_column_width=True)
+                with col2:
+                    st.image(images[1]['url'], caption="중간 이미지", use_column_width=True)  
+                with col3:
+                    st.image(images[2]['url'], caption="마무리 이미지", use_column_width=True)
 
-st.info("💡 위 이미지들을 글에 수동으로 삽입하세요!")
+                st.info("💡 위 이미지들이 블로그 글에 자동 삽입됩니다!")
 
-# 마크다운으로 표시
-st.subheader("📝 생성된 블로그 글")
-st.markdown(ai_content)
+                # 생성된 글 표시 (마크다운으로)
+                st.subheader("📝 생성된 블로그 글 (이미지 포함)")
+                st.markdown(ai_content)
 
-# 복사용 텍스트
-with st.expander("📋 복사용 텍스트"):
-    st.text_area("복사용", ai_content, height=400)
+                # 원본 텍스트도 제공
+                with st.expander("📋 텍스트만 복사하기"):
+                    st.text_area("텍스트 전용", ai_content, height=300)
+
                 st.session_state['generated_content'] = ai_content
 
 # 워드프레스 자동 업로드
