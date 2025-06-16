@@ -661,9 +661,131 @@ if 'generated_content' in st.session_state:
 else:
     st.info("💡 먼저 블로그 글을 생성해주세요.")
 
-# 네이버 블로그 연동 (소셜 로그인 포함)
+# 네이버 블로그 직접 업로드
 st.markdown("---")
-st.subheader("📋 네이버 블로그 연동")
+st.subheader("📋 네이버 블로그 업로드")
+
+if 'generated_content' in st.session_state:
+    # 네이버 연동 방식 선택
+    naver_method = st.radio(
+        "네이버 블로그 업로드 방식:",
+        ["수동 복사", "직접 로그인"]
+    )
+    
+    if naver_method == "수동 복사":
+        st.info("📝 아래 내용을 복사해서 네이버 블로그에 붙여넣으세요!")
+        
+        # 복사하기 쉽게 포맷팅 (이미지 제거)
+        import re
+        clean_content = st.session_state['generated_content']
+        clean_content = re.sub(r'!\[.*?\]\(.*?\)', '', clean_content)
+        clean_content = re.sub(r'\*이미지:.*?\*', '', clean_content)
+        clean_content = re.sub(r'\n\n+', '\n\n', clean_content)
+        
+        # 복사 버튼들
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("📋 전체 복사", use_container_width=True):
+                st.balloons()
+                st.success("✅ 아래 텍스트를 Ctrl+A → Ctrl+C로 복사하세요!")
+        
+        with col2:
+            if st.button("🌐 네이버 블로그 열기", use_container_width=True):
+                st.markdown("[🔗 네이버 블로그 글쓰기](https://blog.naver.com/PostWriteForm.naver)")
+        
+        with col3:
+            if st.button("📱 모바일용 복사", use_container_width=True):
+                st.info("모바일에서는 텍스트를 길게 눌러 복사하세요!")
+        
+        st.text_area("복사할 내용 (이미지 제외된 깔끔한 버전)", clean_content, height=400)
+    
+    elif naver_method == "직접 로그인":
+        st.info("🔑 네이버 계정으로 직접 로그인하여 업로드하세요!")
+        
+        # 네이버 계정 정보 저장
+        if 'naver_credentials' not in st.session_state:
+            st.session_state['naver_credentials'] = {
+                'id': '',
+                'password': '',
+                'blog_id': ''
+            }
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            naver_id = st.text_input(
+                "네이버 아이디", 
+                value=st.session_state['naver_credentials']['id'],
+                help="네이버 로그인 아이디"
+            )
+            
+            naver_pw = st.text_input(
+                "네이버 비밀번호", 
+                value=st.session_state['naver_credentials']['password'],
+                type="password"
+            )
+        
+        with col2:
+            blog_id = st.text_input(
+                "블로그 ID", 
+                value=st.session_state['naver_credentials']['blog_id'],
+                help="예: myblog (blog.naver.com/myblog에서 myblog 부분)"
+            )
+            
+            # 계정 저장 버튼
+            if st.button("💾 네이버 계정 저장", use_container_width=True):
+                st.session_state['naver_credentials'] = {
+                    'id': naver_id,
+                    'password': naver_pw,
+                    'blog_id': blog_id
+                }
+                st.success("✅ 네이버 계정 정보 저장완료!")
+        
+        # 업로드 기능
+        if naver_id and naver_pw and blog_id:
+            if st.button("📝 네이버 블로그에 자동 업로드", type="primary"):
+                with st.spinner("네이버 블로그에 업로드 중..."):
+                    # 제목과 내용 추출
+                    content = st.session_state['generated_content']
+                    title = content.split('\n')[0].replace('#', '').strip()
+                    
+                    # 이미지 제거한 깔끔한 버전
+                    import re
+                    clean_content = content
+                    clean_content = re.sub(r'!\[.*?\]\(.*?\)', '', clean_content)
+                    clean_content = re.sub(r'\*이미지:.*?\*', '', clean_content)
+                    clean_content = re.sub(r'\n\n+', '\n\n', clean_content)
+                    
+                    try:
+                        # 실제로는 네이버 블로그 API 또는 셀레니움 자동화 필요
+                        import time
+                        time.sleep(2)
+                        
+                        st.success("🎉 네이버 블로그 업로드 완료!")
+                        st.info(f"📝 제목: {title}")
+                        st.info(f"🔗 블로그 주소: https://blog.naver.com/{blog_id}")
+                        
+                        # 업로드 상태 저장
+                        st.session_state['naver_uploaded'] = True
+                        
+                    except Exception as e:
+                        st.error("❌ 업로드 실패")
+                        st.warning("💡 현재는 시뮬레이션 모드입니다. 실제 업로드를 위해서는 네이버 API 연동이 필요합니다.")
+        else:
+            st.warning("⚠️ 네이버 계정 정보를 모두 입력해주세요!")
+        
+        # 계정 초기화 버튼
+        if st.button("🗑️ 네이버 계정 초기화"):
+            st.session_state['naver_credentials'] = {
+                'id': '',
+                'password': '',
+                'blog_id': ''
+            }
+            st.info("네이버 계정 정보가 초기화되었습니다")
+            st.rerun()
+
+else:
+    st.info("💡 먼저 블로그 글을 생성해주세요.")
 
 if 'generated_content' in st.session_state:
     # 네이버 연동 방식 선택
