@@ -562,6 +562,54 @@ if st.button("✨ 고품질 개인 블로그 글 생성", type="primary", use_co
                     st.error("❌ OpenAI API 키를 입력해주세요!")
                 else:
                     # OpenAI API 호출
+                    prompt = f"""
+당신은 블로그 콘텐츠 전문가입니다. {keyword} 주제로 독자가 끝까지 읽을 수밖에 없는 매력적이고 풍부한 블로그 글을 작성해주세요.
+
+다음 요소들을 반드시 포함해주세요:
+
+🎯 구조:
+- 강력한 제목 (이모지 포함)
+- 후킹이 강한 도입부
+- 읽으면 얻을 수 있는 것들 (체크리스트)
+- 5개 핵심 포인트 (번호 매기기)
+- 실전 적용 가이드
+- FAQ 섹션
+- 감정적 마무리 + CTA
+
+💡 스타일:
+- 이모지 적극 활용
+- 대화체 톤
+- 구체적인 예시와 수치
+- 독자 참여 유도 문장
+- 중간중간 질문 던지기
+
+📝 내용:
+- 전문성 + 접근성
+- 실용적인 팁과 방법
+- 단계별 가이드
+- 주의사항과 실수 방지법
+- 성공 사례 언급
+
+✨ 참여 유도:
+- 댓글 작성 유도
+- 공유 요청
+- 관련 글 추천
+- 구독 유도
+
+2000자 이상, 한국어로 작성해주세요.
+"""
+                    
+                    headers = {
+                        "Authorization": f"Bearer {openai_key}",
+                        "Content-Type": "application/json"
+                    }
+                    data = {
+                        "model": "gpt-3.5-turbo",
+                        "messages": [{"role": "user", "content": prompt}],
+                        "max_tokens": 1800,
+                        "temperature": 0.7
+                    }
+                    
                     try:
                         response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
                         if response.status_code == 200:
@@ -578,11 +626,7 @@ if st.button("✨ 고품질 개인 블로그 글 생성", type="primary", use_co
                 if 'hook_style' not in locals():
                     hook_style = "충격적 사실로 시작"  # 기본값 설정
                 ai_content = generate_local_blog(keyword, hook_style)
-                if 'blogger_type' in locals() and 'persona_name' in locals() and 'persona' in locals() and 'structure' in locals():
-                    st.success(f"🎉 {blogger_type} 스타일의 고품질 개인 블로그 글 생성 완료!")
-                    st.info(f"📝 페르소나: {persona_name.split('_')[1]} ({persona['job']}) | 구조: {structure}")
-                else:
-                    st.success("✅ 로컬 AI로 블로그 글 생성 완료!")
+                st.success("✅ 로컬 AI로 블로그 글 생성 완료!")
 
             if ai_content:
                 # 생성된 이미지들 미리보기
