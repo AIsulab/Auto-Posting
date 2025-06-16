@@ -547,7 +547,7 @@ def generate_local_blog(keyword, hook_style):
     improvement_percent = random.randint(23, 89)
     
     # 계절/시기 정보
-    current_season = ["봄", "여름", "가을", "겨울"][datetime.now().month//3]
+    current_season = ["봄", "여름", "가을", "겨울"][datetime.datetime.now().month//3]
     
     # 페르소나별 맞춤 인사말
     greetings = {
