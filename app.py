@@ -4,77 +4,173 @@ import base64
 import json
 from datetime import datetime
 import time
+import random
 
 # 페이지 설정
 st.set_page_config(
     page_title="AI 블로그 자동화 시스템",
     page_icon="📝",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# CSS 스타일
+# 로그인 정보
+VALID_ID = "aisulab"
+VALID_PW = "!js44358574"
+
+# CSS 스타일 (모바일 친화적)
 st.markdown("""
 <style>
     .main-header {
         text-align: center;
         color: #2E86C1;
         margin-bottom: 30px;
+        font-size: 2.5rem;
     }
+    
+    @media (max-width: 768px) {
+        .main-header {
+            font-size: 1.8rem;
+        }
+    }
+    
     .login-container {
         max-width: 400px;
         margin: 0 auto;
         padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        background-color: #f8f9fa;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
     }
+    
+    .model-card {
+        background: linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 100%);
+        padding: 20px;
+        border-radius: 12px;
+        margin: 15px 0;
+        border-left: 5px solid #2E86C1;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .model-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
     .success-message {
         color: #28a745;
         font-weight: bold;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
     }
+    
     .error-message {
         color: #dc3545;
         font-weight: bold;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
     }
-    .code-block {
-        background-color: #f4f4f4;
+    
+    .feature-box {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        padding: 20px;
+        border-radius: 12px;
+        margin: 15px 0;
+        border-left: 5px solid #ffc107;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
         padding: 15px;
-        border-radius: 5px;
-        border-left: 4px solid #2E86C1;
+        border-radius: 10px;
+        text-align: center;
         margin: 10px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+    
     .stButton > button {
         width: 100%;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
     }
-    .model-info {
-        background-color: #e8f4f8;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 10px 0;
-        border-left: 4px solid #2E86C1;
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .content-preview {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #dee2e6;
+        margin: 15px 0;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    @media (max-width: 768px) {
+        .login-container {
+            margin: 10px;
+            padding: 20px;
+        }
+        
+        .model-card, .feature-box {
+            margin: 10px 0;
+            padding: 15px;
+        }
+        
+        .content-preview {
+            padding: 15px;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
 
 # AI 모델 정보
 AI_MODELS = {
-    "openai": {
-        "name": "OpenAI GPT-3.5",
-        "description": "고품질 텍스트 생성, API 키 필요",
-        "requires_api_key": True,
-        "free": False
+    "huggingface_gpt2": {
+        "name": "GPT-2 (Hugging Face)",
+        "description": "창의적인 텍스트 생성에 특화된 무료 모델",
+        "api_url": "https://api-inference.huggingface.co/models/gpt2",
+        "strength": "창의성",
+        "best_for": "스토리텔링, 창의적 글쓰기"
     },
-    "huggingface": {
-        "name": "Hugging Face (무료)",
-        "description": "무료 사용 가능, API 키 불필요",
-        "requires_api_key": False,
-        "free": True
+    "huggingface_kogpt2": {
+        "name": "KoGPT-2 (한국어 특화)",
+        "description": "한국어 텍스트 생성 전용 무료 모델",
+        "api_url": "https://api-inference.huggingface.co/models/skt/kogpt2-base-v2",
+        "strength": "한국어 자연스러움",
+        "best_for": "한국어 블로그, 자연스러운 표현"
     },
-    "colab": {
-        "name": "Google Colab (무료)",
-        "description": "Google의 무료 AI 모델",
-        "requires_api_key": False,
-        "free": True
+    "huggingface_openchat": {
+        "name": "OpenChat (대화형)",
+        "description": "대화형 응답에 최적화된 무료 모델",
+        "api_url": "https://api-inference.huggingface.co/models/openchat/openchat-3.5-0106",
+        "strength": "대화형 응답",
+        "best_for": "Q&A 형식, 친근한 톤"
+    },
+    "huggingface_flan": {
+        "name": "Flan-T5 (지시 이해)",
+        "description": "명확한 지시 이해에 특화된 무료 모델",
+        "api_url": "https://api-inference.huggingface.co/models/google/flan-t5-large",
+        "strength": "지시 이해",
+        "best_for": "구체적 요구사항, 정보성 글"
+    },
+    "huggingface_bloom": {
+        "name": "BLOOM (다국어)",
+        "description": "다국어 지원 대형 언어 모델",
+        "api_url": "https://api-inference.huggingface.co/models/bigscience/bloom-560m",
+        "strength": "다국어 지원",
+        "best_for": "전문적 글쓰기, 다양한 주제"
     }
 }
 
@@ -86,416 +182,228 @@ def init_session_state():
         st.session_state.generated_content = ""
     if 'blog_title' not in st.session_state:
         st.session_state.blog_title = ""
-    if 'login_attempted' not in st.session_state:
-        st.session_state.login_attempted = False
     if 'selected_model' not in st.session_state:
-        st.session_state.selected_model = "huggingface"
+        st.session_state.selected_model = "huggingface_kogpt2"
+    if 'generation_stats' not in st.session_state:
+        st.session_state.generation_stats = {}
 
 def authenticate_user(username, password):
     """사용자 인증"""
-    return username == "aisulab" and password == "!js44358574"
+    return username == VALID_ID and password == VALID_PW
 
-def generate_content_openai(keyword, api_key):
-    """OpenAI API를 사용한 콘텐츠 생성"""
-    try:
-        url = "https://api.openai.com/v1/chat/completions"
-        
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        prompt = f"""
-        건강 정보 블로그 글을 작성해주세요.
-        
-        주제: {keyword}
-        
-        다음 요구사항을 반드시 포함해주세요:
-        1. 1500자 이상의 상세한 내용
-        2. 3개의 소제목으로 구성
-        3. 전문가 조언 섹션 포함
-        4. 실용적이고 신뢰할 수 있는 정보
-        5. 독자가 실천할 수 있는 구체적인 방법 제시
-        
-        글의 구조:
-        - 제목
-        - 서론
-        - 소제목 1: 기본 정보
-        - 소제목 2: 실천 방법
-        - 소제목 3: 주의사항
-        - 전문가 조언
-        - 결론
-        
-        전문적이면서도 이해하기 쉽게 작성해주세요.
-        """
-        
-        data = {
-            "model": "gpt-3.5-turbo",
-            "messages": [
-                {
-                    "role": "system", 
-                    "content": "당신은 건강 정보 전문 블로거입니다. 정확하고 유용한 건강 정보를 제공하는 고품질 블로그 글을 작성해주세요."
-                },
-                {
-                    "role": "user", 
-                    "content": prompt
-                }
-            ],
-            "max_tokens": 2000,
-            "temperature": 0.7
-        }
-        
-        response = requests.post(url, headers=headers, json=data)
-        
-        if response.status_code == 200:
-            result = response.json()
-            return result['choices'][0]['message']['content'].strip()
-        else:
-            error_detail = response.json() if response.headers.get('content-type') == 'application/json' else response.text
-            return f"OpenAI API 호출 실패: {response.status_code} - {error_detail}"
+def create_hooking_prompt(keyword):
+    """광고 수익 최적화를 위한 훅킹 프롬프트 생성"""
+    hooking_starters = [
+        f"'{keyword}'에 대해 99%의 사람들이 모르는 충격적인 진실이 있습니다.",
+        f"의사들이 절대 말하지 않는 '{keyword}'의 숨겨진 비밀을 공개합니다.",
+        f"'{keyword}' 때문에 매년 수만 명이 고통받고 있다는 사실, 알고 계셨나요?",
+        f"3분만 투자하면 '{keyword}'에 대한 당신의 인생이 바뀔 수 있습니다.",
+        f"'{keyword}'로 고민하던 제가 단 7일 만에 완전히 달라진 이야기를 들려드릴게요."
+    ]
     
-    except Exception as e:
-        return f"OpenAI 콘텐츠 생성 중 오류가 발생했습니다: {str(e)}"
+    selected_hook = random.choice(hooking_starters)
+    
+    prompt = f"""
+당신은 광고 수익 최적화 전문 블로거입니다. 독자의 체류시간을 최대화하고 참여도를 높이는 블로그 글을 작성해주세요.
 
-def generate_content_huggingface(keyword):
-    """Hugging Face 무료 모델을 사용한 콘텐츠 생성"""
+주제: {keyword}
+
+필수 구조:
+1. 훅킹 시작: {selected_hook}
+
+2. 문제 인식 단계:
+- 독자가 공감할 수 있는 구체적인 문제 상황 제시
+- "혹시 이런 경험 있으신가요?" 형태의 질문으로 참여 유도
+
+3. 해결책 제시 (3단계 구성):
+- 1단계: 즉시 실행 가능한 간단한 방법
+- 2단계: 중급자를 위한 심화 방법  
+- 3단계: 고급자를 위한 전문가 팁
+
+4. 실제 사례/스토리:
+- "실제로 이 방법을 사용한 A씨의 이야기" 형태
+- 구체적인 수치나 결과 포함
+
+5. 주의사항과 FAQ:
+- "많은 분들이 궁금해하시는 질문들"
+- 실수하기 쉬운 부분 강조
+
+6. 강력한 마무리 CTA:
+- "이 글이 도움되셨다면 댓글로 경험을 공유해주세요!"
+- "주변 분들에게도 공유해서 도움을 주세요!"
+- "더 자세한 정보가 필요하시면 댓글로 질문해주세요!"
+
+글쓰기 규칙:
+- 1500자 이상 작성
+- 친근하고 대화하는 듯한 톤 사용
+- 단락을 짧게 나누어 가독성 향상
+- 중요한 부분은 **강조** 표시
+- 숫자나 통계를 활용해 신뢰성 증대
+- 독자의 행동을 유도하는 문장 자주 사용
+
+지금 바로 시작해주세요!
+"""
+    return prompt
+
+def generate_content_huggingface(keyword, model_key):
+    """Hugging Face 모델을 사용한 콘텐츠 생성"""
     try:
-        # Hugging Face의 무료 Inference API 사용
-        API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"
+        model_info = AI_MODELS[model_key]
+        api_url = model_info["api_url"]
         
-        prompt = f"""건강 주제 '{keyword}'에 대한 상세한 블로그 글을 작성해주세요.
-
-주요 내용:
-1. {keyword}의 기본 정보와 중요성
-2. 실생활에서 적용할 수 있는 방법
-3. 주의사항과 전문가 조언
-
-1500자 이상으로 작성해주세요."""
-
+        # 광고 수익 최적화 프롬프트 생성
+        prompt = create_hooking_prompt(keyword)
+        
         payload = {
             "inputs": prompt,
             "parameters": {
-                "max_length": 1000,
+                "max_new_tokens": 1500,
                 "temperature": 0.7,
-                "do_sample": True
+                "do_sample": True,
+                "top_p": 0.9,
+                "repetition_penalty": 1.1
             }
         }
         
-        # 무료 API이므로 여러 번 시도
+        # 여러 번 시도
         for attempt in range(3):
-            response = requests.post(API_URL, json=payload)
+            response = requests.post(api_url, json=payload)
             
             if response.status_code == 200:
                 result = response.json()
+                
                 if isinstance(result, list) and len(result) > 0:
                     generated_text = result[0].get('generated_text', '')
-                    if generated_text:
-                        return generated_text
-                elif isinstance(result, dict) and 'generated_text' in result:
-                    return result['generated_text']
+                    if generated_text and len(generated_text) > 500:
+                        return clean_generated_content(generated_text, keyword)
+                elif isinstance(result, dict):
+                    if 'generated_text' in result:
+                        generated_text = result['generated_text']
+                        if len(generated_text) > 500:
+                            return clean_generated_content(generated_text, keyword)
+                    elif 'error' in result:
+                        if 'loading' in result['error'].lower():
+                            time.sleep(15)  # 모델 로딩 대기
+                            continue
             
-            # 모델이 로딩 중인 경우 잠시 대기
+            # 503 에러 (모델 로딩 중)인 경우 대기
             if response.status_code == 503:
-                time.sleep(10)
+                time.sleep(20)
                 continue
             
             break
         
-        # Hugging Face API가 실패한 경우 기본 템플릿 제공
-        return generate_fallback_content(keyword)
+        # API 실패 시 최적화된 템플릿 제공
+        return generate_optimized_template(keyword)
     
     except Exception as e:
-        return generate_fallback_content(keyword)
+        return generate_optimized_template(keyword)
 
-def generate_content_colab(keyword):
-    """Google Colab 스타일 무료 모델 시뮬레이션"""
-    try:
-        # 실제로는 Colab에서 실행되는 무료 모델을 시뮬레이션
-        # 여기서는 기본 템플릿을 제공
-        return generate_fallback_content(keyword)
+def clean_generated_content(generated_text, keyword):
+    """생성된 콘텐츠 정리 및 최적화"""
+    # 불필요한 부분 제거
+    content = generated_text.strip()
     
-    except Exception as e:
-        return generate_fallback_content(keyword)
-
-def generate_fallback_content(keyword):
-    """API 실패 시 사용할 기본 콘텐츠 템플릿"""
-    content = f"""# {keyword} - 건강 정보 가이드
-
-## 서론
-{keyword}에 대한 정확하고 유용한 정보를 제공하여 건강한 생활을 도움을 드리고자 합니다.
-
-## 1. {keyword}의 기본 정보
-{keyword}는 우리 건강에 중요한 역할을 합니다. 다음과 같은 특징들이 있습니다:
-
-- 기본적인 정의와 중요성
-- 우리 몸에 미치는 영향
-- 일상생활에서의 역할
-
-## 2. 실천할 수 있는 방법
-{keyword}와 관련하여 실생활에서 적용할 수 있는 방법들:
-
-- 올바른 생활습관 유지
-- 균형잡힌 식단 관리
-- 적절한 운동과 휴식
-- 정기적인 건강 체크
-
-## 3. 주의사항과 관리법
-{keyword}를 관리할 때 주의해야 할 사항들:
-
-- 과도한 섭취나 부족 주의
-- 개인차를 고려한 접근
-- 전문의와의 상담 권장
-- 지속적인 관리의 중요성
-
-## 전문가 조언
-건강 전문가들은 {keyword}에 대해 다음과 같이 조언합니다:
-- 개인의 건강 상태를 고려한 맞춤형 관리가 중요합니다.
-- 급격한 변화보다는 점진적인 개선을 권장합니다.
-- 정확한 정보를 바탕으로 한 올바른 실천이 필요합니다.
-
-## 결론
-{keyword}에 대한 올바른 이해와 실천을 통해 더 건강한 삶을 영위할 수 있습니다. 지속적인 관심과 관리를 통해 건강을 지켜나가시기 바랍니다.
-
-*본 정보는 일반적인 건강 정보이며, 개인의 건강 상태에 따라 다를 수 있습니다. 구체적인 건강 문제는 전문의와 상담하시기 바랍니다.*"""
+    # 제목 추출 시도
+    lines = content.split('\n')
+    title = f"{keyword} - 전문가가 알려주는 완벽 가이드"
+    
+    # 내용 정리
+    if len(content) < 800:
+        return generate_optimized_template(keyword)
+    
+    # CTA 추가 (없는 경우)
+    if "댓글" not in content and "공유" not in content:
+        content += "\n\n---\n\n"
+        content += "💬 **이 글이 도움되셨나요?**\n"
+        content += "- 댓글로 여러분의 경험을 공유해주세요!\n"
+        content += "- 주변 분들에게도 공유해서 도움을 주세요!\n"
+        content += "- 더 궁금한 점이 있으시면 언제든 댓글로 질문해주세요!\n\n"
+        content += "🔔 **더 유용한 건강 정보가 필요하시다면 구독과 좋아요 부탁드립니다!**"
     
     return content
 
-def generate_blog_content(keyword, model_type, api_key=None):
-    """선택된 모델에 따라 블로그 콘텐츠 생성"""
-    if model_type == "openai":
-        if not api_key:
-            return "OpenAI 모델을 사용하려면 API 키가 필요합니다."
-        return generate_content_openai(keyword, api_key)
-    elif model_type == "huggingface":
-        return generate_content_huggingface(keyword)
-    elif model_type == "colab":
-        return generate_content_colab(keyword)
-    else:
-        return "지원하지 않는 모델입니다."
+def generate_optimized_template(keyword):
+    """광고 수익 최적화된 기본 템플릿"""
+    hooking_starters = [
+        f"'{keyword}'에 대해 99%의 사람들이 모르는 충격적인 진실을 공개합니다.",
+        f"의사들이 절대 말하지 않는 '{keyword}'의 숨겨진 비밀이 있습니다.",
+        f"'{keyword}' 때문에 고민하시는 분들, 3분만 투자해보세요."
+    ]
+    
+    selected_hook = random.choice(hooking_starters)
+    
+    content = f"""{selected_hook}
 
-def upload_to_wordpress(wp_url, wp_username, wp_password, title, content):
-    """워드프레스에 글 업로드"""
-    try:
-        # REST API 엔드포인트
-        api_url = f"{wp_url.rstrip('/')}/wp-json/wp/v2/posts"
-        
-        # 인증 정보
-        credentials = base64.b64encode(f"{wp_username}:{wp_password}".encode()).decode()
-        
-        headers = {
-            'Authorization': f'Basic {credentials}',
-            'Content-Type': 'application/json'
-        }
-        
-        data = {
-            'title': title,
-            'content': content,
-            'status': 'draft'  # 초안으로 저장
-        }
-        
-        response = requests.post(api_url, headers=headers, json=data)
-        
-        if response.status_code == 201:
-            post_data = response.json()
-            return True, f"글이 성공적으로 업로드되었습니다! 글 ID: {post_data['id']}"
-        else:
-            return False, f"업로드 실패: {response.status_code} - {response.text}"
-    
-    except Exception as e:
-        return False, f"업로드 중 오류가 발생했습니다: {str(e)}"
+혹시 이런 경험 있으신가요? 
 
-def render_login_page():
-    """로그인 페이지 렌더링"""
-    st.markdown("<h1 class='main-header'>🔐 AI 블로그 자동화 시스템</h1>", unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<div class='login-container'>", unsafe_allow_html=True)
-        st.markdown("### 로그인")
-        
-        # 로그인 폼
-        username = st.text_input("아이디", placeholder="아이디를 입력하세요", key="login_username")
-        password = st.text_input("비밀번호", type="password", placeholder="비밀번호를 입력하세요", key="login_password")
-        
-        if st.button("로그인", key="login_button"):
-            if authenticate_user(username, password):
-                st.session_state.logged_in = True
-                st.success("로그인 성공! 잠시 후 메인 화면으로 이동합니다.")
-                st.balloons()
-                # 페이지를 다시 실행하여 메인 화면 표시
-                st.rerun()
-            else:
-                st.error("아이디 또는 비밀번호가 올바르지 않습니다.")
-        
-        st.markdown("</div>", unsafe_allow_html=True)
+'{keyword}'에 대한 정보를 찾아보려고 인터넷을 뒤져봐도 정작 **실질적으로 도움되는 정보**는 찾기 어려우셨을 겁니다. 
 
-def render_main_page():
-    """메인 페이지 렌더링"""
-    st.markdown("<h1 class='main-header'>📝 AI 블로그 자동화 시스템</h1>", unsafe_allow_html=True)
-    
-    # 상단 헤더 - 로그아웃 버튼
-    col1, col2, col3 = st.columns([6, 1, 1])
-    with col3:
-        if st.button("로그아웃", key="logout_button"):
-            # 세션 상태 초기화
-            st.session_state.logged_in = False
-            st.session_state.generated_content = ""
-            st.session_state.blog_title = ""
-            st.session_state.login_attempted = False
-            st.rerun()
-    
-    # 탭 생성
-    tab1, tab2, tab3 = st.tabs(["🤖 AI 글 생성", "📤 워드프레스 업로드", "📋 네이버 블로그 복사"])
-    
-    with tab1:
-        render_ai_generation_tab()
-    
-    with tab2:
-        render_wordpress_upload_tab()
-    
-    with tab3:
-        render_naver_copy_tab()
+오늘 이 글을 끝까지 읽으시면, 그동안 몰랐던 '{keyword}'의 핵심 포인트를 완벽하게 이해하실 수 있을 거예요.
 
-def render_ai_generation_tab():
-    """AI 글 생성 탭"""
-    st.header("AI 블로그 글 생성")
-    
-    # AI 모델 선택
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        selected_model = st.selectbox(
-            "AI 모델 선택",
-            options=list(AI_MODELS.keys()),
-            format_func=lambda x: AI_MODELS[x]["name"],
-            key="model_select"
-        )
-        st.session_state.selected_model = selected_model
-    
-    with col2:
-        model_info = AI_MODELS[selected_model]
-        st.markdown(f"""
-        <div class='model-info'>
-            <strong>{model_info['name']}</strong><br>
-            {model_info['description']}<br>
-            {'🆓 무료' if model_info['free'] else '💰 유료'} | 
-            {'🔑 API 키 필요' if model_info['requires_api_key'] else '🔓 API 키 불필요'}
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # 입력 필드
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        keyword = st.text_input("키워드", placeholder="예: 비타민D 효능", key="keyword_input")
-        
-        # API 키 입력 (필요한 경우에만)
-        api_key = None
-        if AI_MODELS[selected_model]["requires_api_key"]:
-            api_key = st.text_input("API 키", type="password", placeholder="API 키를 입력하세요", key="api_key_input")
-    
-    with col2:
-        st.info(f"""💡 **{AI_MODELS[selected_model]['name']} 사용 팁**
-- 구체적인 키워드를 입력하세요
-- 생성된 글은 1500자 이상입니다
-{f"- {AI_MODELS[selected_model]['name']} API 키가 필요합니다" if AI_MODELS[selected_model]['requires_api_key'] else "- API 키 없이 무료로 사용 가능합니다"}
-- 무료 모델은 품질이 다를 수 있습니다""")
-    
-    # 생성 버튼
-    if st.button("AI 글 생성", type="primary", key="generate_button"):
-        if keyword:
-            # API 키 검증
-            if AI_MODELS[selected_model]["requires_api_key"] and not api_key:
-                st.error(f"{AI_MODELS[selected_model]['name']}을(를) 사용하려면 API 키가 필요합니다.")
-                return
-            
-            with st.spinner(f"{AI_MODELS[selected_model]['name']}이(가) 블로그 글을 생성하고 있습니다..."):
-                content = generate_blog_content(keyword, selected_model, api_key)
-                st.session_state.generated_content = content
-                st.session_state.blog_title = f"{keyword} - 건강 정보 가이드"
-            
-            st.success("글 생성이 완료되었습니다!")
-        else:
-            st.error("키워드를 입력해주세요.")
-    
-    # 생성된 콘텐츠 표시
-    if st.session_state.generated_content:
-        st.subheader("생성된 블로그 글")
-        st.markdown(f"**제목:** {st.session_state.blog_title}")
-        st.markdown(f"**사용된 모델:** {AI_MODELS[st.session_state.selected_model]['name']}")
-        st.markdown("---")
-        st.markdown(st.session_state.generated_content)
+## 🚨 대부분 사람들이 놓치는 핵심 포인트
 
-def render_wordpress_upload_tab():
-    """워드프레스 업로드 탭"""
-    st.header("워드프레스 자동 업로드")
-    
-    if not st.session_state.generated_content:
-        st.warning("먼저 AI 글 생성 탭에서 블로그 글을 생성해주세요.")
-    else:
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            wp_url = st.text_input("워드프레스 주소", placeholder="https://yoursite.com", key="wp_url")
-            wp_username = st.text_input("워드프레스 사용자명", key="wp_username")
-            wp_password = st.text_input("워드프레스 비밀번호", type="password", key="wp_password")
-        
-        with col2:
-            st.info("🔐 **보안 정보**\n- 애플리케이션 비밀번호 사용 권장\n- REST API가 활성화되어야 합니다\n- 초안으로 저장됩니다")
-        
-        if st.button("워드프레스에 업로드", type="primary", key="wp_upload_button"):
-            if wp_url and wp_username and wp_password:
-                with st.spinner("워드프레스에 업로드 중..."):
-                    success, message = upload_to_wordpress(
-                        wp_url, wp_username, wp_password,
-                        st.session_state.blog_title,
-                        st.session_state.generated_content
-                    )
-                
-                if success:
-                    st.success(message)
-                else:
-                    st.error(message)
-            else:
-                st.error("모든 워드프레스 정보를 입력해주세요.")
+많은 분들이 '{keyword}'에 대해 잘못 알고 계신 부분이 있습니다. 
 
-def render_naver_copy_tab():
-    """네이버 블로그 복사 탭"""
-    st.header("네이버 블로그 복사")
-    
-    if not st.session_state.generated_content:
-        st.warning("먼저 AI 글 생성 탭에서 블로그 글을 생성해주세요.")
-    else:
-        st.info("📋 아래 내용을 복사하여 네이버 블로그에 붙여넣기 하세요.")
-        
-        # 제목
-        st.subheader("제목")
-        st.code(st.session_state.blog_title, language=None)
-        
-        # 본문
-        st.subheader("본문")
-        st.code(st.session_state.generated_content, language=None)
-        
-        # 통계 정보
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            word_count = len(st.session_state.generated_content)
-            st.metric("글자 수", f"{word_count:,}자")
-        with col2:
-            st.metric("사용된 모델", AI_MODELS[st.session_state.selected_model]['name'])
-        with col3:
-            st.metric("모델 타입", "🆓 무료" if AI_MODELS[st.session_state.selected_model]['free'] else "💰 유료")
+**첫 번째 오해:** 단순히 정보만 알면 된다고 생각하시는 것
+**두 번째 오해:** 모든 사람에게 같은 방법이 통한다고 생각하시는 것
+**세 번째 오해:** 즉석에서 결과를 기대하시는 것
 
-def main():
-    """메인 함수"""
-    # 세션 상태 초기화
-    init_session_state()
-    
-    # 로그인 상태에 따른 페이지 렌더링
-    if st.session_state.logged_in:
-        render_main_page()
-    else:
-        render_login_page()
+## 💡 단계별 실전 가이드
 
-if __name__ == "__main__":
-    main()
+### 1단계: 기초 다지기 (누구나 가능)
+- **즉시 실행 가능한 방법**: 오늘부터 바로 시작할 수 있는 간단한 습관
+- **준비물**: 특별한 도구 없이도 가능한 방법들
+- **소요시간**: 하루 5-10분이면 충분
+
+### 2단계: 중급자 과정 (1-2주 후)
+- **심화 방법**: 기초를 다진 후 적용할 수 있는 고급 기법
+- **주의사항**: 이 단계에서 많은 분들이 실수하는 부분들
+- **효과 측정**: 자신의 진행 상황을 확인하는 방법
+
+### 3단계: 전문가 레벨 (1개월 후)
+- **고급 팁**: 전문가들만 아는 특별한 노하우
+- **개인 맞춤**: 자신에게 맞는 방법을 찾는 법
+- **지속 관리**: 효과를 오래 유지하는 비결
+
+## 📈 실제 성공 사례
+
+**A씨(35세, 직장인)의 이야기:**
+"처음에는 반신반의했는데, 정말로 2주 만에 확실한 변화를 느꼈어요. 특히 2단계 방법이 저에게는 가장 효과적이었습니다."
+
+**B씨(28세, 주부)의 후기:**
+"바쁜 일상 중에도 쉽게 따라할 수 있어서 좋았어요. 지금은 주변 사람들에게도 추천하고 있습니다."
+
+## ❓ 자주 묻는 질문들
+
+**Q: 얼마나 오래 해야 효과를 볼 수 있나요?**
+A: 개인차가 있지만, 대부분 1-2주 내에 초기 변화를 느끼실 수 있습니다.
+
+**Q: 나이나 성별에 상관없이 가능한가요?**
+A: 네, 이 방법은 연령과 성별에 관계없이 적용 가능합니다.
+
+**Q: 부작용은 없나요?**
+A: 자연스러운 방법이므로 부작용 걱정은 하지 않으셔도 됩니다.
+
+## ⚠️ 꼭 피해야 할 실수들
+
+1. **성급한 기대**: 너무 빠른 결과를 원하면 오히려 역효과
+2. **일관성 부족**: 며칠 하다가 그만두면 의미가 없음
+3. **과도한 적용**: 많이 한다고 더 좋은 것은 아님
+
+## 🎯 마무리: 지금 바로 시작하세요!
+
+오늘 알려드린 '{keyword}' 정보가 여러분의 삶에 실질적인 도움이 되길 바랍니다.
+
+**기억하세요:**
+- 완벽할 필요 없습니다. 시작이 중요해요.
+- 자신에게 맞는 속도로 진행하세요.
+- 꾸준함이 가장 중요합니다.
+
+---
+
+💬 **이 글이 도움되셨나요?**
+
+- **댓글로 여러분의 경험을 공유해주세요!** 다른 분들에게도 큰 도움이 됩니다.
+- **주변 분들에게도 공유해서** 더 많은 사람들이 도움받을 수 있도록 해주세요!
+- **더 궁금한 점이 있으시면** 언제든 댓글로 질문해주세요.
