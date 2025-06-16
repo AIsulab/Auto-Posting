@@ -147,7 +147,7 @@ VALID_PW = "!js44358574"
 
 # 로그인 체크
 if not st.session_state.get('login_ok', False):
-    st.title("대표님 전용 블로그 자동화 로그인")
+    st.title("AI SUALB 대표님 전용 블로그 자동화 로그인")
     user_id = st.text_input("아이디")
     user_pw = st.text_input("비밀번호", type="password")
     
