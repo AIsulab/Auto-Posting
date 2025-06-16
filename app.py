@@ -88,7 +88,7 @@ def generate_ai_blog(keyword, current_season):
 
 ## 💡 {keyword} 핵심 활용법 3가지
 
-![{images[1]['alt']}]({images[1]['url']})
+<img src="{images[1]['url']}" alt="{images[1]['alt']}" style="width:100%; max-width:600px; height:auto; margin:20px 0; border-radius:8px; display:block;">
 
 ### 1️⃣ 업무 자동화 (가장 중요!)
 
@@ -167,7 +167,7 @@ def generate_ai_blog(keyword, current_season):
 
 ## 🤝 마무리하며...
 
-![{images[2]['alt']}]({images[2]['url']})
+<img src="{images[2]['url']}" alt="{images[2]['alt']}" style="width:100%; max-width:600px; height:auto; margin:20px 0; border-radius:8px; display:block;">
 
 {keyword}는 이제 선택이 아닌 필수가 되었어요. 
 
