@@ -546,11 +546,7 @@ if upload_method == "직접 입력":
             'password': 'JxAb 8Xos SfZe Mb9n XNMo Bhdq'
         }
     
-    wp_url = st.text_input(
-        "워드프레스 주소", 
-        value=st.session_state['wp_credentials']['url'],
-        help="예: https://sulab.shop"
-    )
+    wp_url = st.text_input("워드프레스 주소", value="http://sulab.shop")
     
     wp_id = st.text_input(
         "워드프레스 아이디", 
