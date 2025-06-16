@@ -154,7 +154,7 @@ def generate_local_blog(keyword, hook_style):
     }
     
     # 더 풍부한 블로그 글 템플릿
-    blog_content = f"""# 🔥 {keyword} 완벽 가이드 - 2024년 최신 업데이트
+    blog_content = f"""# 🔥 {keyword} 완벽 가이드 - 2025년 최신 업데이트
 
 {hooks[hook_style]}
 
@@ -362,7 +362,7 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
                     }
                     
                     prompt = f"""
-당신은 블로그 콘텐츠 전문가입니다. {keyword} 주제로 독자가 끝까지 읽을 수밖에 없는 매력적이고 풍부한 블로그 글을 작성해주세요.
+당신은 2025년 최신 블로그 콘텐츠 전문가입니다. {keyword} 주제로 2025년 트렌드를 반영한 독자가 끝까지 읽을 수밖에 없는 매력적이고 풍부한 블로그 글을 작성해주세요.
 
 시작 방식: {hooks[hook_style]}
 
