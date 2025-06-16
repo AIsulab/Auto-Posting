@@ -59,15 +59,12 @@ def get_oauth_url(provider):
     
     return f"{base_url}?{urllib.parse.urlencode(params)}"
 
-# OAuth 콜백 처리 함수
 def handle_oauth_callback():
     """OAuth 콜백 처리"""
-    query_params = st.experimental_get_query_params()
-    
-    if "code" in query_params:
-        auth_code = query_params["code"][0]
-        if "state" in query_params:
-            state = query_params["state"][0]
+    # 새로운 query_params 사용
+    if "code" in st.query_params:
+        auth_code = st.query_params["code"]
+        state = st.query_params.get("state", "")
         
         # 실제로는 여기서 access_token 교환
         st.session_state['oauth_token'] = f"token_{auth_code[:10]}"
