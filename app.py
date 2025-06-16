@@ -6,6 +6,7 @@ VALID_ID = "aisulab"
 VALID_PW = "!js44358574"
 TOTP_SECRET = "JBSWY3DPEHPK3PXP"
 
+# 세션 상태 초기화
 if 'login_ok' not in st.session_state:
     st.session_state['login_ok'] = False
 if 'otp_ok' not in st.session_state:
@@ -20,7 +21,7 @@ if not st.session_state['login_ok']:
         if user_id == VALID_ID and user_pw == VALID_PW:
             st.session_state['login_ok'] = True
             st.success("로그인 성공! 아래 2차 인증을 진행하세요.")
-            st.experimental_rerun()  # 페이지 새로 고침
+            # 여기서는 rerun을 사용하지 않고 다음 단계로 넘어갑니다.
         else:
             st.error("아이디/비밀번호가 틀렸습니다.")
     st.stop()
