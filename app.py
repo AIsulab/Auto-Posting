@@ -69,7 +69,6 @@ def generate_ai_blog(keyword, current_season):
 
 오늘은 제가 실제로 사용해보고 효과를 본 {keyword} 활용법을 공유해드릴게요.
 
-# 변경 (HTML)
 <img src="{images[0]['url']}" alt="{images[0]['alt']}" style="width:100%; max-width:600px; height:auto; margin:20px 0; border-radius:8px;">
 
 ## 🤔 왜 {keyword}를 시작하게 되었나요?
