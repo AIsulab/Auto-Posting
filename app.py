@@ -755,7 +755,7 @@ def call_huggingface_api(model_name, prompt):
     
 # 최종 생성 버튼
 st.markdown("---")
-if st.button("✨ 고품질 개인 블로그 글 생성", type="primary", use_container_width=True):
+if st.button("✨ 고품질 개인 블로그 글 생성", type="primary", use_container_width=True, key="generate_blog"):
     if not keyword:
         st.warning("⚠️ 키워드를 입력해주세요!")
     else:
@@ -927,7 +927,7 @@ elif upload_method == "API 키 사용":
 
 # 업로드 처리
 if 'generated_content' in st.session_state:
-    if st.button("📤 워드프레스에 업로드", type="primary"):
+    if st.button("📤 워드프레스에 업로드", type="primary", key="wp_upload"):
         if upload_method == "직접 입력" and not (wp_url and wp_id and wp_pw):
             st.warning("⚠️ 모든 정보를 입력해주세요!")
         elif upload_method == "소셜 로그인" and 'wp_connected' not in st.session_state:
@@ -1014,7 +1014,7 @@ if 'generated_content' in st.session_state:
         # 복사 버튼들
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("📋 전체 복사", use_container_width=True):
+            if st.button("📋 전체 복사", use_container_width=True, key="naver_copy"):
                 st.balloons()
                 st.success("✅ 아래 텍스트를 Ctrl+A → Ctrl+C로 복사하세요!")
         
@@ -1072,7 +1072,7 @@ if 'generated_content' in st.session_state:
         
         # 업로드 기능
         if naver_id and naver_pw and blog_id:
-            if st.button("📝 네이버 블로그에 자동 업로드", type="primary"):
+            if st.button("📝 네이버 블로그에 자동 업로드", type="primary", key="naver_upload"):
                 with st.spinner("네이버 블로그에 업로드 중..."):
                     # 제목과 내용 추출
                     content = st.session_state['generated_content']
