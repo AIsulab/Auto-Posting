@@ -2,8 +2,8 @@ import streamlit as st
 import requests
 import pyotp
 
-VALID_ID = "myid"
-VALID_PW = "mysecretpw"
+VALID_ID = "aisulab"
+VALID_PW = "!js44358574"
 TOTP_SECRET = "JBSWY3DPEHPK3PXP"
 
 if 'login_ok' not in st.session_state:
