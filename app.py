@@ -87,6 +87,8 @@ def generate_ai_blog(keyword, current_season):
 
 ## 💡 {keyword} 핵심 활용법 3가지
 
+![{images[1]['alt']}]({images[1]['url']})
+
 ### 1️⃣ 업무 자동화 (가장 중요!)
 
 제가 가장 많이 사용하는 방법이에요. 
@@ -163,6 +165,8 @@ def generate_ai_blog(keyword, current_season):
 ---
 
 ## 🤝 마무리하며...
+
+![{images[2]['alt']}]({images[2]['url']})
 
 {keyword}는 이제 선택이 아닌 필수가 되었어요. 
 
