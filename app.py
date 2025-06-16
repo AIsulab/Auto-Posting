@@ -145,11 +145,17 @@ if 'logged_in' not in st.query_params:
 VALID_ID = "aisulab"
 VALID_PW = "!js44358574"
 
+# URL에서 로그인 상태 먼저 복원
+if st.query_params.get('logged_in') == 'true':
+    st.session_state['login_ok'] = True
+
 # 로그인 체크
 if not st.session_state.get('login_ok', False):
-    st.title("AI SUALB 대표님 전용 블로그 자동화 로그인")
-    user_id = st.text_input("아이디")
-    user_pw = st.text_input("비밀번호", type="password")
+    st.title("대표님 전용 블로그 자동화 로그인")
+    
+    # 계정 정보 미리 입력
+    user_id = st.text_input("아이디", value="aisulab")
+    user_pw = st.text_input("비밀번호", value="!js44358574", type="password")
     
     if st.button("로그인"):
         if user_id == VALID_ID and user_pw == VALID_PW:
@@ -160,11 +166,12 @@ if not st.session_state.get('login_ok', False):
             st.rerun()
         else:
             st.error("❌ 아이디/비밀번호가 틀렸습니다.")
+    
+    # 자동 로그인 옵션
+    if st.checkbox("🔒 로그인 상태 유지 (이 브라우저에서)", value=True):
+        st.info("💡 새로고침해도 로그인이 유지됩니다")
+    
     st.stop()
-
-# URL에서 로그인 상태 복원
-if st.query_params.get('logged_in') == 'true':
-    st.session_state['login_ok'] = True
 
 # 메인 화면
 st.title("📝 AI 블로그 자동화 시스템")
