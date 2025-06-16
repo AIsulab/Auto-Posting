@@ -659,7 +659,7 @@ def generate_local_blog(keyword, hook_style):
 - 스트레스 관리 방법 찾기
 - 계절 변화에 맞춰 조정하기
 
-**3. {persona['location']} 지역 특화 팁**
+**3. 지역별 특화 팁**
 - 근처 {random.choice(['산책로', '헬스장', '수영장', '요가원'])} 활용하기
 - 지역 {random.choice(['전통시장', '대형마트', '건강식품점'])}에서 구할 수 있는 재료들
 - {current_season} 철 특별히 주의할 점들
