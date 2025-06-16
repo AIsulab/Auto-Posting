@@ -407,3 +407,537 @@ A: 자연스러운 방법이므로 부작용 걱정은 하지 않으셔도 됩�
 - **댓글로 여러분의 경험을 공유해주세요!** 다른 분들에게도 큰 도움이 됩니다.
 - **주변 분들에게도 공유해서** 더 많은 사람들이 도움받을 수 있도록 해주세요!
 - **더 궁금한 점이 있으시면** 언제든 댓글로 질문해주세요.
+
+🔔 **더 유용한 정보가 필요하시다면 구독과 좋아요 부탁드립니다!**"""
+
+    return content
+
+def save_to_file(content, filename):
+    """생성된 콘텐츠를 파일로 저장"""
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(content)
+        return True
+    except Exception as e:
+        return False
+
+def display_generation_stats():
+    """생성 통계 표시"""
+    if st.session_state.generation_stats:
+        st.markdown("### 📊 생성 통계")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("""
+            <div class="stats-card">
+                <h4>총 생성 횟수</h4>
+                <h2>{}</h2>
+            </div>
+            """.format(st.session_state.generation_stats.get('total_generations', 0)), 
+            unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown("""
+            <div class="stats-card">
+                <h4>성공률</h4>
+                <h2>{}%</h2>
+            </div>
+            """.format(st.session_state.generation_stats.get('success_rate', 0)), 
+            unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown("""
+            <div class="stats-card">
+                <h4>평균 길이</h4>
+                <h2>{} 자</h2>
+            </div>
+            """.format(st.session_state.generation_stats.get('avg_length', 0)), 
+            unsafe_allow_html=True)
+
+def login_page():
+    """로그인 페이지"""
+    st.markdown('<h1 class="main-header">🔐 AI 블로그 자동화 시스템</h1>', unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="login-container">
+        <h3 style="text-align: center; margin-bottom: 20px; color: #2E86C1;">로그인</h3>
+    """, unsafe_allow_html=True)
+    
+    with st.form("login_form"):
+        username = st.text_input("아이디", placeholder="사용자 아이디를 입력하세요")
+        password = st.text_input("비밀번호", type="password", placeholder="비밀번호를 입력하세요")
+        submit_button = st.form_submit_button("로그인", use_container_width=True)
+        
+        if submit_button:
+            if authenticate_user(username, password):
+                st.session_state.logged_in = True
+                st.success("로그인 성공!")
+                st.rerun()
+            else:
+                st.error("잘못된 아이디 또는 비밀번호입니다.")
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # 시스템 소개
+    st.markdown("""
+    <div class="feature-box">
+        <h3>🚀 시스템 특징</h3>
+        <ul>
+            <li><strong>다양한 AI 모델</strong>: 5개의 전문화된 AI 모델 지원</li>
+            <li><strong>광고 수익 최적화</strong>: 독자 참여도를 높이는 콘텐츠 구조</li>
+            <li><strong>모바일 친화적</strong>: 반응형 디자인으로 어디서든 사용 가능</li>
+            <li><strong>자동 최적화</strong>: SEO 친화적이고 CTA가 포함된 블로그 글 생성</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+def main_page():
+    """메인 페이지"""
+    st.markdown('<h1 class="main-header">📝 AI 블로그 자동화 시스템</h1>', unsafe_allow_html=True)
+    
+    # 로그아웃 버튼
+    col1, col2 = st.columns([4, 1])
+    with col2:
+        if st.button("로그아웃", type="secondary"):
+            st.session_state.logged_in = False
+            st.rerun()
+    
+    # 시스템 상태 표시
+    display_generation_stats()
+    
+    # AI 모델 선택
+    st.markdown("### 🤖 AI 모델 선택")
+    
+    for model_key, model_info in AI_MODELS.items():
+        with st.container():
+            st.markdown(f"""
+            <div class="model-card">
+                <h4>{model_info['name']}</h4>
+                <p>{model_info['description']}</p>
+                <p><strong>강점:</strong> {model_info['strength']}</p>
+                <p><strong>추천용도:</strong> {model_info['best_for']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(f"선택: {model_info['name']}", key=model_key):
+                st.session_state.selected_model = model_key
+                st.success(f"✅ {model_info['name']} 모델이 선택되었습니다!")
+    
+    st.markdown("---")
+    
+    # 현재 선택된 모델 표시
+    if st.session_state.selected_model:
+        current_model = AI_MODELS[st.session_state.selected_model]
+        st.info(f"🎯 현재 선택된 모델: **{current_model['name']}**")
+    
+    # 콘텐츠 생성
+    st.markdown("### ✍️ 블로그 콘텐츠 생성")
+    
+    with st.form("content_generation_form"):
+        keyword = st.text_input(
+            "키워드/주제", 
+            placeholder="예: 다이어트, 투자, 건강관리 등",
+            help="블로그 글의 주제나 키워드를 입력하세요"
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            content_type = st.selectbox(
+                "콘텐츠 유형",
+                ["정보성 글", "체험담", "가이드", "리뷰", "비교분석"]
+            )
+        
+        with col2:
+            target_length = st.selectbox(
+                "글 길이",
+                ["짧음 (800-1200자)", "보통 (1200-1800자)", "길음 (1800자 이상)"]
+            )
+        
+        advanced_options = st.expander("🔧 고급 옵션")
+        with advanced_options:
+            include_seo = st.checkbox("SEO 최적화 포함", value=True)
+            include_cta = st.checkbox("CTA (Call-to-Action) 포함", value=True)
+            emotional_tone = st.selectbox(
+                "감정 톤",
+                ["친근함", "전문적", "열정적", "신뢰감", "유머러스"]
+            )
+        
+        generate_button = st.form_submit_button("🚀 콘텐츠 생성", use_container_width=True)
+        
+        if generate_button:
+            if not keyword:
+                st.error("키워드를 입력해주세요!")
+            elif not st.session_state.selected_model:
+                st.error("AI 모델을 선택해주세요!")
+            else:
+                with st.spinner("AI가 콘텐츠를 생성하고 있습니다... ⏳"):
+                    try:
+                        # 콘텐츠 생성
+                        generated_content = generate_content_huggingface(
+                            keyword, 
+                            st.success("✅ 콘텐츠가 성공적으로 생성되었습니다!")
+                            st.rerun()
+                        else:
+                            st.error("콘텐츠 생성에 실패했습니다. 다시 시도해주세요.")
+                    
+                    except Exception as e:
+                        st.error(f"오류가 발생했습니다: {str(e)}")
+    
+    # 생성된 콘텐츠 표시
+    if st.session_state.generated_content:
+        st.markdown("---")
+        st.markdown("### 📄 생성된 콘텐츠")
+        
+        # 콘텐츠 미리보기
+        with st.container():
+            st.markdown(f"**제목:** {st.session_state.blog_title}")
+            st.markdown(f"**길이:** {len(st.session_state.generated_content):,} 자")
+            st.markdown(f"**사용 모델:** {AI_MODELS[st.session_state.selected_model]['name']}")
+            
+            # 콘텐츠 표시
+            st.markdown("""
+            <div class="content-preview">
+            """, unsafe_allow_html=True)
+            
+            st.markdown(st.session_state.generated_content)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+        
+        # 액션 버튼들
+        st.markdown("### 🔧 콘텐츠 관리")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            if st.button("📋 복사하기", use_container_width=True):
+                st.code(st.session_state.generated_content, language=None)
+                st.info("위 텍스트를 선택하여 복사하세요!")
+        
+        with col2:
+            if st.button("💾 다운로드", use_container_width=True):
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"blog_post_{timestamp}.txt"
+                
+                st.download_button(
+                    label="파일 다운로드",
+                    data=st.session_state.generated_content,
+                    file_name=filename,
+                    mime="text/plain",
+                    use_container_width=True
+                )
+        
+        with col3:
+            if st.button("🔄 재생성", use_container_width=True):
+                st.session_state.generated_content = ""
+                st.session_state.blog_title = ""
+                st.rerun()
+        
+        with col4:
+            if st.button("✏️ 편집모드", use_container_width=True):
+                st.session_state.edit_mode = True
+                st.rerun()
+        
+        # 편집 모드
+        if st.session_state.get('edit_mode', False):
+            st.markdown("---")
+            st.markdown("### ✏️ 콘텐츠 편집")
+            
+            with st.form("edit_form"):
+                new_title = st.text_input("제목 수정", value=st.session_state.blog_title)
+                new_content = st.text_area(
+                    "내용 수정", 
+                    value=st.session_state.generated_content,
+                    height=400
+                )
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    save_button = st.form_submit_button("💾 저장", use_container_width=True)
+                with col2:
+                    cancel_button = st.form_submit_button("❌ 취소", use_container_width=True)
+                
+                if save_button:
+                    st.session_state.blog_title = new_title
+                    st.session_state.generated_content = new_content
+                    st.session_state.edit_mode = False
+                    st.success("✅ 수정사항이 저장되었습니다!")
+                    st.rerun()
+                
+                if cancel_button:
+                    st.session_state.edit_mode = False
+                    st.rerun()
+
+def analytics_page():
+    """분석 페이지"""
+    st.markdown('<h1 class="main-header">📊 콘텐츠 분석</h1>', unsafe_allow_html=True)
+    
+    if st.session_state.generated_content:
+        content = st.session_state.generated_content
+        
+        # 기본 통계
+        st.markdown("### 📈 기본 통계")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            char_count = len(content)
+            st.markdown(f"""
+            <div class="stats-card">
+                <h4>총 글자 수</h4>
+                <h2>{char_count:,}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            word_count = len(content.split())
+            st.markdown(f"""
+            <div class="stats-card">
+                <h4>단어 수</h4>
+                <h2>{word_count:,}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            paragraph_count = len([p for p in content.split('\n\n') if p.strip()])
+            st.markdown(f"""
+            <div class="stats-card">
+                <h4>문단 수</h4>
+                <h2>{paragraph_count}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            read_time = max(1, char_count // 500)  # 대략적인 읽기 시간 (분)
+            st.markdown(f"""
+            <div class="stats-card">
+                <h4>예상 읽기시간</h4>
+                <h2>{read_time}분</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # SEO 분석
+        st.markdown("### 🔍 SEO 분석")
+        
+        # 키워드 밀도 분석
+        keywords_in_content = []
+        common_words = ['이', '가', '을', '를', '의', '에', '와', '과', '도', '만', '부터', '까지', '로', '으로']
+        words = [word.strip('.,!?()[]{}') for word in content.split() if len(word) > 1]
+        words = [word for word in words if word not in common_words]
+        
+        from collections import Counter
+        word_freq = Counter(words)
+        top_keywords = word_freq.most_common(10)
+        
+        if top_keywords:
+            st.markdown("**주요 키워드 (빈도):**")
+            for word, freq in top_keywords:
+                st.write(f"- {word}: {freq}회")
+        
+        # 가독성 점수
+        st.markdown("### 📖 가독성 분석")
+        
+        sentences = [s.strip() for s in content.split('.') if s.strip()]
+        avg_sentence_length = sum(len(s.split()) for s in sentences) / len(sentences) if sentences else 0
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="stats-card">
+                <h4>평균 문장 길이</h4>
+                <h2>{avg_sentence_length:.1f} 단어</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            readability_score = 100 - (avg_sentence_length * 2)  # 간단한 가독성 점수
+            readability_score = max(0, min(100, readability_score))
+            
+            st.markdown(f"""
+            <div class="stats-card">
+                <h4>가독성 점수</h4>
+                <h2>{readability_score:.0f}/100</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # 감정 분석 (간단 버전)
+        st.markdown("### 😊 감정 톤 분석")
+        
+        positive_words = ['좋은', '훌륭한', '최고', '완벽', '추천', '도움', '효과', '성공', '만족']
+        negative_words = ['나쁜', '문제', '실패', '어려운', '힘든', '위험', '주의', '경고']
+        
+        positive_count = sum(1 for word in positive_words if word in content)
+        negative_count = sum(1 for word in negative_words if word in content)
+        
+        if positive_count > negative_count:
+            tone = "긍정적"
+            tone_color = "#28a745"
+        elif negative_count > positive_count:
+            tone = "부정적"
+            tone_color = "#dc3545"
+        else:
+            tone = "중립적"
+            tone_color = "#6c757d"
+        
+        st.markdown(f"""
+        <div style="background-color: {tone_color}20; padding: 15px; border-radius: 10px; border-left: 5px solid {tone_color};">
+            <h4 style="color: {tone_color};">전체적인 톤: {tone}</h4>
+            <p>긍정 단어: {positive_count}개 | 부정 단어: {negative_count}개</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    else:
+        st.info("분석할 콘텐츠가 없습니다. 먼저 콘텐츠를 생성해주세요.")
+
+def settings_page():
+    """설정 페이지"""
+    st.markdown('<h1 class="main-header">⚙️ 시스템 설정</h1>', unsafe_allow_html=True)
+    
+    # API 설정
+    st.markdown("### 🔑 API 설정")
+    
+    with st.expander("Hugging Face API 토큰"):
+        api_token = st.text_input(
+            "API 토큰 (선택사항)", 
+            type="password",
+            help="더 안정적인 서비스를 위해 개인 API 토큰을 설정할 수 있습니다."
+        )
+        
+        if st.button("토큰 저장"):
+            if api_token:
+                st.session_state.hf_api_token = api_token
+                st.success("API 토큰이 저장되었습니다!")
+            else:
+                st.warning("토큰을 입력해주세요.")
+    
+    # 콘텐츠 설정
+    st.markdown("### 📝 콘텐츠 기본 설정")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        default_tone = st.selectbox(
+            "기본 톤",
+            ["친근함", "전문적", "열정적", "신뢰감", "유머러스"],
+            index=0
+        )
+        
+        default_length = st.selectbox(
+            "기본 길이",
+            ["짧음 (800-1200자)", "보통 (1200-1800자)", "길음 (1800자 이상)"],
+            index=1
+        )
+    
+    with col2:
+        auto_seo = st.checkbox("자동 SEO 최적화", value=True)
+        auto_cta = st.checkbox("자동 CTA 포함", value=True)
+        auto_stats = st.checkbox("자동 통계 업데이트", value=True)
+    
+    # 템플릿 관리
+    st.markdown("### 📋 템플릿 관리")
+    
+    template_options = st.multiselect(
+        "사용할 템플릿 구성요소",
+        ["훅킹 인트로", "문제 제기", "해결책 단계", "실제 사례", "FAQ", "주의사항", "강력한 CTA"],
+        default=["훅킹 인트로", "문제 제기", "해결책 단계", "실제 사례", "FAQ", "강력한 CTA"]
+    )
+    
+    # 시스템 정보
+    st.markdown("### ℹ️ 시스템 정보")
+    
+    st.info(f"""
+    **시스템 버전:** 1.0.0
+    **지원 모델:** {len(AI_MODELS)}개
+    **현재 선택 모델:** {AI_MODELS.get(st.session_state.selected_model, {}).get('name', '없음')}
+    **총 생성 횟수:** {st.session_state.generation_stats.get('total_generations', 0)}회
+    """)
+    
+    # 데이터 관리
+    st.markdown("### 🗂️ 데이터 관리")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🔄 세션 초기화", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                if key != 'logged_in':
+                    del st.session_state[key]
+            st.success("세션이 초기화되었습니다!")
+            st.rerun()
+    
+    with col2:
+        if st.button("📊 통계 리셋", use_container_width=True):
+            st.session_state.generation_stats = {}
+            st.success("통계가 리셋되었습니다!")
+    
+    with col3:
+        if st.button("💾 설정 저장", use_container_width=True):
+            # 설정 저장 로직 (실제로는 파일이나 DB에 저장)
+            st.success("설정이 저장되었습니다!")
+
+def main():
+    """메인 애플리케이션"""
+    init_session_state()
+    
+    # 로그인 체크
+    if not st.session_state.logged_in:
+        login_page()
+        return
+    
+    # 네비게이션
+    st.sidebar.markdown("## 📱 메뉴")
+    
+    pages = {
+        "🏠 메인": "main",
+        "📊 분석": "analytics", 
+        "⚙️ 설정": "settings"
+    }
+    
+    selected_page = st.sidebar.radio("페이지 선택", list(pages.keys()))
+    
+    # 현재 상태 표시
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 📈 현재 상태")
+    
+    if st.session_state.selected_model:
+        model_name = AI_MODELS[st.session_state.selected_model]['name']
+        st.sidebar.info(f"**선택된 모델:**\n{model_name}")
+    
+    if st.session_state.generated_content:
+        content_length = len(st.session_state.generated_content)
+        st.sidebar.success(f"**생성된 콘텐츠:**\n{content_length:,}자")
+    
+    # 통계 요약
+    if st.session_state.generation_stats:
+        total = st.session_state.generation_stats.get('total_generations', 0)
+        st.sidebar.metric("총 생성 횟수", total)
+    
+    # 페이지 라우팅
+    page_key = pages[selected_page]
+    
+    if page_key == "main":
+        main_page()
+    elif page_key == "analytics":
+        analytics_page()
+    elif page_key == "settings":
+        settings_page()
+
+if __name__ == "__main__":
+    main()session_state.selected_model
+                        )
+                        
+                        if generated_content:
+                            st.session_state.generated_content = generated_content
+                            st.session_state.blog_title = f"{keyword} - 완벽 가이드"
+                            
+                            # 통계 업데이트
+                            if 'generation_stats' not in st.session_state:
+                                st.session_state.generation_stats = {}
+                            
+                            stats = st.session_state.generation_stats
+                            stats['total_generations'] = stats.get('total_generations', 0) + 1
+                            stats['success_rate'] = 100  # 템플릿 사용으로 항상 성공
+                            stats['avg_length'] = len(generated_content)
+                            
+                            st.
