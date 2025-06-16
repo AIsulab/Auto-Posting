@@ -131,7 +131,7 @@ def get_free_images(keyword, count=3):
             "alt": f"{keyword} 관련 {['시작', '중간', '마무리'][i]} 이미지"
         })
     
-    
+    return images
 
 # 로그인 정보를 URL 파라미터로 유지
 if 'logged_in' not in st.query_params:
@@ -375,12 +375,24 @@ if keyword_method == "🔥 트렌딩 키워드":
 else:
     keyword = st.text_input("키워드 직접 입력", placeholder="예: 혈압에 좋은 음식, 투자 비법")
 
-# 선택된 키워드 표시
 if keyword:
     st.success(f"✅ 선택된 키워드: **{keyword}**")
     
     # 실제 검색량 기반 예상 조회수 계산
-base_volume = KEYWORD_SEARCH_VOLUME.get(keyword, random.randint(15000, 45000))
+    base_volume = KEYWORD_SEARCH_VOLUME.get(keyword, random.randint(15000, 45000))
+    # 계절 보정 (+-20%)
+    seasonal_multiplier = random.uniform(0.8, 1.2)
+    estimated_views = int(base_volume * seasonal_multiplier)
+
+    # 트렌드 상태 결정
+    if estimated_views > 50000:
+        trend_status = "🔥 급상승"
+    elif estimated_views > 30000:
+        trend_status = "📈 상승"
+    else:
+        trend_status = "📊 안정"
+
+    st.info(f"📊 예상 월 조회수: {estimated_views:,}회 | {trend_status}")
 # 계절 보정 (+-20%)
 seasonal_multiplier = random.uniform(0.8, 1.2)
 estimated_views = int(base_volume * seasonal_multiplier)
@@ -422,8 +434,13 @@ with st.expander("🔧 고급 설정 (선택사항)"):
 # 설정 요약 표시
 st.info(f"💡 설정 요약: {blogger_type} 스타일 + {writing_mood} + 개인화 요소들")
 
-# 블로그 글 구조 상수 정의
-BLOG_STRUCTURES = [
+# 최종 생성 버튼 (더 눈에 띄게)
+st.markdown("---")
+st.markdown("### 🚀 AI 블로그 글 생성")
+if st.button("✨ 고품질 개인 블로그 글 생성", type="primary", use_container_width=True):
+
+    # 블로그 글 구조 상수 정의
+    BLOG_STRUCTURES = [
     "문제-해결형",
     "방법론-중심형",
     "경험-공유형",
