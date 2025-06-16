@@ -13,37 +13,57 @@ PIXABAY_API_KEY = "demo"   # 무료 사용
 
 # 무료 이미지 검색 함수
 def get_free_images(keyword, count=3):
-    """무료 이미지 URL 가져오기"""
+    """키워드 연관 무료 이미지 가져오기"""
     images = []
     
-    # Unsplash 무료 이미지 (API 키 없이 사용 가능)
+    # 키워드별 특화 이미지 매핑
+    keyword_images = {
+        "혈압": {
+            "keywords": ["blood-pressure", "health", "medical", "heart"],
+            "unsplash_ids": ["Nqj0Ci-mDHs", "hpjSkU2UYSU", "5jctAMjz21A"]
+        },
+        "음식": {
+            "keywords": ["food", "healthy-food", "nutrition", "vegetables"],
+            "unsplash_ids": ["08bOYnH_r_E", "1SPu0KT-Ejg", "nTZOILVZuOg"]
+        },
+        "건강": {
+            "keywords": ["health", "wellness", "fitness", "medical"],
+            "unsplash_ids": ["eWqOgJ-lfiI", "Nqj0Ci-mDHs", "5jctAMjz21A"]
+        },
+        "다이어트": {
+            "keywords": ["diet", "healthy-eating", "fitness", "weight-loss"],
+            "unsplash_ids": ["1SPu0KT-Ejg", "08bOYnH_r_E", "nTZOILVZuOg"]
+        }
+    }
+    
+    # 키워드 매칭
+    matched_category = None
+    for category, data in keyword_images.items():
+        if category in keyword:
+            matched_category = data
+            break
+    
+    # 기본값 설정
+    if not matched_category:
+        matched_category = keyword_images["건강"]
+    
     try:
-        # 키워드를 영어로 변환 (간단한 매핑)
-        keyword_en = {
-            "혈압": "blood pressure",
-            "음식": "food",
-            "건강": "health",
-            "다이어트": "diet",
-            "운동": "exercise",
-            "영양": "nutrition"
-        }.get(keyword.split()[0], keyword)
-        
-        # Lorem Picsum 사용 (완전 무료)
+        # Unsplash 특정 이미지 ID 사용 (무료)
+        for i, img_id in enumerate(matched_category["unsplash_ids"][:count]):
+            img_url = f"https://images.unsplash.com/{img_id}?w=600&h=400&fit=crop"
+            images.append({
+                "url": img_url,
+                "alt": f"{keyword} 관련 {['시작', '중간', '마무리'][i]} 이미지"
+            })
+    except:
+        # 백업: 키워드 기반 Pixabay 스타일
+        backup_seeds = [101, 202, 303]
         for i in range(count):
-            width = random.choice([800, 600, 700])
-            height = random.choice([400, 300, 350])
-            seed = random.randint(1, 1000)
-            img_url = f"https://picsum.photos/{width}/{height}?random={seed}"
+            img_url = f"https://picsum.photos/600/400?random={backup_seeds[i]}"
             images.append({
                 "url": img_url,
                 "alt": f"{keyword} 관련 이미지 {i+1}"
             })
-    except:
-        # 기본 이미지
-        images = [{
-            "url": "https://picsum.photos/600/300?random=1",
-            "alt": f"{keyword} 관련 이미지"
-        }]
     
     return images
 
@@ -443,10 +463,11 @@ if 'generated_content' in st.session_state:
     if st.button("📤 워드프레스에 업로드"):
         if wp_url and wp_id and wp_pw:
             with st.spinner("워드프레스에 업로드 중..."):
+                # API URL 생성
                 if wp_url.endswith('/'):
-    api_url = f"{wp_url}wp-json/wp/v2/posts"
-else:
-    api_url = f"{wp_url}/wp-json/wp/v2/posts"
+                    api_url = f"{wp_url}wp-json/wp/v2/posts"
+                else:
+                    api_url = f"{wp_url}/wp-json/wp/v2/posts"
                 
                 # 제목 추출 (첫 번째 줄에서 # 제거)
                 content = st.session_state['generated_content']
