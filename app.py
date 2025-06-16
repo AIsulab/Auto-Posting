@@ -401,6 +401,99 @@ with st.expander("🔧 고급 설정 (선택사항)"):
 # 설정 요약 표시
 st.info(f"💡 설정 요약: {blogger_type} 스타일 + {writing_mood} + 개인화 요소들")
 
+# 블로그 글 구조 상수 정의
+BLOG_STRUCTURES = [
+    "문제-해결형",
+    "방법론-중심형",
+    "경험-공유형",
+    "비교-분석형",
+    "순위-리스트형",
+    "Q&A형",
+    "가이드-튜토리얼형",
+    "체크리스트형"
+]
+
+def get_smart_persona(keyword):
+    """키워드에 맞는 스마트한 페르소나 생성"""
+    personas = {
+        "건강_의사": {
+            "job": "가정의학과 전문의",
+            "experience": "15년",
+            "specialty": "만성질환 관리",
+            "tone": "전문적이면서도 친근한"
+        },
+        "운동_트레이너": {
+            "job": "퍼스널 트레이너",
+            "experience": "10년",
+            "specialty": "체중 관리, 근력 운동",
+            "tone": "열정적이고 동기부여하는"
+        },
+        "요리_셰프": {
+            "job": "전문 요리사",
+            "experience": "12년",
+            "specialty": "건강식, 한식 퓨전",
+            "tone": "실용적이고 창의적인"
+        },
+        "공부_교사": {
+            "job": "진로상담 교사",
+            "experience": "8년",
+            "specialty": "학습법, 시간관리",
+            "tone": "조언자적이고 체계적인"
+        },
+        "직장_멘토": {
+            "job": "커리어 코치",
+            "experience": "20년",
+            "specialty": "직무 역량 개발",
+            "tone": "통찰력 있고 실천적인"
+        }
+    }
+    
+    # 키워드에 따른 페르소나 선택
+    if "건강" in keyword or "질병" in keyword or "다이어트" in keyword:
+        persona_name = "건강_의사"
+    elif "운동" in keyword or "체중" in keyword or "근육" in keyword:
+        persona_name = "운동_트레이너"
+    elif "요리" in keyword or "음식" in keyword or "레시피" in keyword:
+        persona_name = "요리_셰프"
+    elif "공부" in keyword or "학습" in keyword or "시험" in keyword:
+        persona_name = "공부_교사"
+    else:
+        persona_name = "직장_멘토"
+    
+    return persona_name, personas[persona_name]
+
+def generate_personal_experience(keyword, persona, persona_name):
+    """페르소나의 특성을 반영한 개인적 경험담 생성"""
+    experiences = {
+        "건강_의사": [
+            f"제가 {persona['experience']}동안 {persona['specialty']} 분야에서 수많은 환자들을 진료하면서 발견한 {keyword}에 대한 놀라운 사실이 있습니다.",
+            f"진료실에서 만난 환자들 중 {keyword} 때문에 고민하시는 분들이 정말 많았어요. 그래서 제가 특별히 연구하고 정리한 내용을 공유하려고 합니다.",
+            f"{persona['specialty']} 전문의로서, {keyword}에 대한 오해와 진실을 명확하게 알려드리고 싶습니다."
+        ],
+        "운동_트레이너": [
+            f"{persona['experience']}간의 트레이닝 경험에서 찾아낸 {keyword}의 핵심 포인트를 알려드립니다.",
+            f"제 회원님들 중 {keyword}로 고민하시는 분들을 위해 특별히 개발한 프로그램이 있습니다.",
+            f"저도 처음에는 {keyword}에 대해 잘못 알고 있었어요. 그런데 수많은 시행착오 끝에 발견한 진짜 해결책이 있습니다."
+        ],
+        "요리_셰프": [
+            f"주방에서 {persona['experience']}동안 연구한 {keyword} 비법을 처음으로 공개합니다.",
+            f"{persona['specialty']} 전문가로서 {keyword}에 대한 특별한 노하우를 알려드리려고 해요.",
+            f"많은 분들이 {keyword}를 어려워하시는데, 제가 쉽게 알려드리겠습니다."
+        ],
+        "공부_교사": [
+            f"{persona['experience']}동안 수많은 학생들의 {keyword} 고민을 해결해주면서 깨달은 점이 있습니다.",
+            f"진로상담 교사로서 {keyword}에 대한 학생들의 고민을 해결해주면서 발견한 핵심 원리가 있어요.",
+            f"{keyword}! 선생님인 저도 처음에는 막막했답니다. 그래서 준비했어요."
+        ],
+        "직장_멘토": [
+            f"20년 넘게 수많은 직장인들의 {keyword} 고민을 상담하면서 발견한 공통점이 있습니다.",
+            f"저도 처음 직장생활 할 때는 {keyword} 때문에 정말 힘들었어요. 그때의 경험을 바탕으로 해결책을 찾았습니다.",
+            f"수많은 기업에서 강의하면서 모은 {keyword}에 대한 노하우를 공유합니다."
+        ]
+    }
+    
+    return random.choice(experiences[persona_name])
+
 # 업그레이드된 로컬 AI 글 생성 함수 (이미지 포함)
 def generate_local_blog(keyword, hook_style):
     """고품질 개인 블로거 스타일 글 생성"""
@@ -411,9 +504,8 @@ def generate_local_blog(keyword, hook_style):
     
     # 무료 이미지 가져오기
     images = get_free_images(keyword, 3)
-    
-    # 개인적 경험담 생성
-    personal_exp = generate_personal_experience(keyword, persona)
+      # 개인적 경험담 생성
+    personal_exp = generate_personal_experience(keyword, persona, persona_name)
     
     # 구체적 수치와 데이터 (랜덤 생성하되 현실적으로)
     success_rate = random.randint(78, 94)
