@@ -21,7 +21,7 @@ if not st.session_state['login_ok']:
         if user_id == VALID_ID and user_pw == VALID_PW:
             st.session_state['login_ok'] = True
             st.success("로그인 성공! 아래 2차 인증을 진행하세요.")
-            # 여기서는 rerun을 사용하지 않고 다음 단계로 넘어갑니다.
+            st.experimental_rerun()  # 페이지 새로 고침
         else:
             st.error("아이디/비밀번호가 틀렸습니다.")
     st.stop()
@@ -35,6 +35,7 @@ if st.session_state['login_ok'] and not st.session_state['otp_ok']:
         if totp.verify(otp_input):
             st.session_state['otp_ok'] = True
             st.success("2차 인증 성공! 자동화 프로그램 시작")
+            st.experimental_rerun()  # 페이지 새로 고침
         else:
             st.error("OTP 코드가 일치하지 않습니다.")
     st.info("구글 OTP 앱에 아래 시크릿을 등록하세요 (앱에서 '설정 키 입력' 선택):")
@@ -114,7 +115,7 @@ if st.button("워드프레스로 글 업로드"):
         try:
             res = requests.post(api_url, json=data, auth=(wp_id, wp_pw))
             if res.status_code == 201:
-                st.success("워드프레스 업로드 성공!")
+                st.success("워드프레스를 업로드 성공!")
             else:
                 st.error(f"워드프레스 오류: {res.status_code}, {res.text}")
         except Exception as e:
