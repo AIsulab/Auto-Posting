@@ -3,9 +3,9 @@ import requests
 import pyotp
 
 ########## 1. 로그인 & 구글 OTP 2차 인증 ##########
-VALID_ID = "myid"         # 대표님만 아는 아이디
-VALID_PW = "mysecretpw"   # 대표님만 아는 비밀번호
-TOTP_SECRET = "JBSWY3DPEHPK3PXP"  # 구글 OTP 앱에 등록할 시크릿
+VALID_ID = "myid"         # 원하는 아이디로 변경
+VALID_PW = "mysecretpw"   # 원하는 비밀번호로 변경
+TOTP_SECRET = "JBSWY3DPEHPK3PXP"  # 구글 OTP 앱에 등록할 시크릿(16자 영문대문자+숫자, 자유변경 가능)
 
 if 'login_ok' not in st.session_state:
     st.session_state['login_ok'] = False
