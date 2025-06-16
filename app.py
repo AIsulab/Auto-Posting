@@ -1,5 +1,4 @@
 import streamlit as st
-import openai
 import requests
 import base64
 import json
@@ -65,9 +64,14 @@ def authenticate_user(username, password):
     return username == "aisulab" and password == "!js44358574"
 
 def generate_blog_content(keyword, openai_api_key):
-    """OpenAI를 사용하여 블로그 콘텐츠 생성"""
+    """requests를 사용하여 OpenAI API 직접 호출로 블로그 콘텐츠 생성"""
     try:
-        openai.api_key = openai_api_key
+        url = "https://api.openai.com/v1/chat/completions"
+        
+        headers = {
+            "Authorization": f"Bearer {openai_api_key}",
+            "Content-Type": "application/json"
+        }
         
         prompt = f"""
         건강 정보 블로그 글을 작성해주세요.
@@ -93,18 +97,35 @@ def generate_blog_content(keyword, openai_api_key):
         전문적이면서도 이해하기 쉽게 작성해주세요.
         """
         
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "당신은 건강 정보 전문 블로거입니다. 정확하고 유용한 건강 정보를 제공하는 고품질 블로그 글을 작성해주세요."},
-                {"role": "user", "content": prompt}
+        data = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+                {
+                    "role": "system", 
+                    "content": "당신은 건강 정보 전문 블로거입니다. 정확하고 유용한 건강 정보를 제공하는 고품질 블로그 글을 작성해주세요."
+                },
+                {
+                    "role": "user", 
+                    "content": prompt
+                }
             ],
-            max_tokens=2000,
-            temperature=0.7
-        )
+            "max_tokens": 2000,
+            "temperature": 0.7
+        }
         
-        return response.choices[0].message.content.strip()
+        response = requests.post(url, headers=headers, json=data)
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result['choices'][0]['message']['content'].strip()
+        else:
+            error_detail = response.json() if response.headers.get('content-type') == 'application/json' else response.text
+            return f"OpenAI API 호출 실패: {response.status_code} - {error_detail}"
     
+    except requests.exceptions.RequestException as e:
+        return f"네트워크 오류가 발생했습니다: {str(e)}"
+    except KeyError as e:
+        return f"API 응답 형식 오류: {str(e)}"
     except Exception as e:
         return f"콘텐츠 생성 중 오류가 발생했습니다: {str(e)}"
 
