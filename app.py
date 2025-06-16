@@ -538,9 +538,53 @@ upload_method = st.radio(
 )
 
 if upload_method == "직접 입력":
-    wp_url = st.text_input("워드프레스 주소", placeholder="http://sulab.shop", value="http://sulab.shop")
-    wp_id = st.text_input("워드프레스 아이디", value="aisulab")
-    wp_pw = st.text_input("워드프레스 비밀번호", vlaue="JxAb 8Xos SfZe Mb9n XNMo Bhdq")
+    # 계정 정보 자동 저장 및 불러오기
+    if 'wp_credentials' not in st.session_state:
+        st.session_state['wp_credentials'] = {
+            'url': 'http://sulab.shop',
+            'username': 'aisulab',
+            'password': 'JxAb 8Xos SfZe Mb9n XNMo Bhdq'
+        }
+    
+    wp_url = st.text_input(
+        "워드프레스 주소", 
+        value=st.session_state['wp_credentials']['url'],
+        help="예: https://sulab.shop"
+    )
+    
+    wp_id = st.text_input(
+        "워드프레스 아이디", 
+        value=st.session_state['wp_credentials']['username'],
+        help="이메일 또는 사용자명"
+    )
+    
+    wp_pw = st.text_input(
+        "워드프레스 비밀번호", 
+        value=st.session_state['wp_credentials']['password'],
+        type="password",
+        help="애플리케이션 비밀번호 권장"
+    )
+    
+    # 계정 정보 저장 버튼
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        if st.button("💾 계정 정보 저장"):
+            st.session_state['wp_credentials'] = {
+                'url': wp_url,
+                'username': wp_id, 
+                'password': wp_pw
+            }
+            st.success("✅ 계정 정보가 저장되었습니다!")
+    
+    with col2:
+        if st.button("🗑️ 초기화"):
+            st.session_state['wp_credentials'] = {
+                'url': '',
+                'username': '',
+                'password': ''
+            }
+            st.info("계정 정보가 초기화되었습니다")
+            st.experimental_rerun()
     
 elif upload_method == "소셜 로그인":
     st.info("🔐 소셜 로그인으로 간편하게 연결하세요!")
