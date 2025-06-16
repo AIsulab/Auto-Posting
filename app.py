@@ -527,14 +527,14 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
 
                 st.session_state['generated_content'] = ai_content
 
-# 워드프레스 자동 업로드 (소셜 로그인 포함)
+# 워드프레스 자동 업로드
 st.markdown("---")
 st.subheader("📤 워드프레스 자동 업로드")
 
-# 연결 방식 선택
+# 연결 방식 선택 (소셜 로그인 제거)
 upload_method = st.radio(
     "연결 방식을 선택하세요:",
-    ["직접 입력", "소셜 로그인", "API 키 사용"]
+    ["직접 입력", "API 키 사용"]
 )
 
 if upload_method == "직접 입력":
@@ -568,111 +568,30 @@ if upload_method == "직접 입력":
     # 계정 정보 저장 버튼
     col1, col2 = st.columns([3, 1])
     with col1:
-        if st.button("💾 계정 정보 저장"):
+        if st.button("💾 WP 계정 저장"):
             st.session_state['wp_credentials'] = {
                 'url': wp_url,
                 'username': wp_id, 
                 'password': wp_pw
             }
-            st.success("✅ 계정 정보가 저장되었습니다!")
+            st.success("✅ 워드프레스 계정 정보 저장완료!")
     
     with col2:
-        if st.button("🗑️ 초기화"):
+        if st.button("🗑️ WP 초기화"):
             st.session_state['wp_credentials'] = {
                 'url': '',
                 'username': '',
                 'password': ''
             }
-            st.info("계정 정보가 초기화되었습니다")
-            st.experimental_rerun()
-    
-elif upload_method == "소셜 로그인":
-    st.info("🔐 소셜 로그인으로 간편하게 연결하세요!")
-    
-    # OAuth 콜백 확인
-    if handle_oauth_callback():
-        st.rerun()
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("🌐 Google로 로그인", use_container_width=True):
-            google_oauth_url = get_oauth_url("google")
-            st.markdown(f'<a href="{google_oauth_url}" target="_blank">🔗 Google 로그인 창 열기</a>', unsafe_allow_html=True)
-            st.info("💡 팝업이 차단되면 위 링크를 클릭하세요!")
-            
-            # JavaScript로 팝업 창 열기
-            st.markdown(f"""
-            <script>
-                window.open('{google_oauth_url}', 'google_login', 'width=500,height=600,scrollbars=yes,resizable=yes');
-            </script>
-            """, unsafe_allow_html=True)
-    
-    with col2:
-        if st.button("🟢 네이버로 로그인", use_container_width=True):
-            naver_oauth_url = get_oauth_url("naver")
-            st.markdown(f'<a href="{naver_oauth_url}" target="_blank">🔗 네이버 로그인 창 열기</a>', unsafe_allow_html=True)
-            st.info("💡 팝업이 차단되면 위 링크를 클릭하세요!")
-            
-            # JavaScript로 팝업 창 열기
-            st.markdown(f"""
-            <script>
-                window.open('{naver_oauth_url}', 'naver_login', 'width=500,height=600,scrollbars=yes,resizable=yes');
-            </script>
-            """, unsafe_allow_html=True)
-    
-    with col3:
-        if st.button("🔗 WordPress 연동", use_container_width=True):
-            wp_oauth_url = get_oauth_url("wordpress")
-            st.markdown(f'<a href="{wp_oauth_url}" target="_blank">🔗 WordPress 로그인 창 열기</a>', unsafe_allow_html=True)
-            st.info("💡 팝업이 차단되면 위 링크를 클릭하세요!")
-            
-            # JavaScript로 팝업 창 열기
-            st.markdown(f"""
-            <script>
-                window.open('{wp_oauth_url}', 'wordpress_login', 'width=500,height=600,scrollbars=yes,resizable=yes');
-            </script>
-            """, unsafe_allow_html=True)
-    
-    # 수동 인증 코드 입력 옵션
-    st.markdown("---")
-    st.subheader("🔑 또는 인증 코드 직접 입력")
-    
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        auth_code = st.text_input("로그인 후 받은 인증 코드를 입력하세요", placeholder="예: 4/0AX4XfWh...")
-    with col2:
-        if st.button("✅ 인증", use_container_width=True):
-            if auth_code:
-                st.session_state['oauth_token'] = f"manual_{auth_code[:10]}"
-                st.session_state['oauth_connected'] = True
-                st.success("🎉 수동 인증 성공!")
-                st.rerun()
-            else:
-                st.error("인증 코드를 입력해주세요!")
-    
-    # 연동 상태 표시
-    if st.session_state.get('oauth_connected'):
-        st.success("✅ 소셜 로그인 연동 완료!")
-        st.info(f"🔑 토큰: {st.session_state.get('oauth_token', 'N/A')[:20]}...")
-        
-        if st.button("🔓 연동 해제"):
-            del st.session_state['oauth_connected']
-            del st.session_state['oauth_token']
+            st.info("워드프레스 계정 정보 초기화됨")
             st.rerun()
-        
-        wp_url = "https://sulab.shop"
-        wp_id = "oauth_connected"
-        wp_pw = st.session_state.get('oauth_token', 'oauth_token')
-    else:
-        st.warning("⚠️ 위 버튼 중 하나를 클릭하여 로그인해주세요!")
 
 elif upload_method == "API 키 사용":
     st.info("🔑 워드프레스 API 키를 사용하세요 (가장 안전)")
     wp_url = st.text_input("워드프레스 주소", value="https://sulab.shop")
     api_key = st.text_input("API 키", type="password", help="워드프레스 설정에서 발급받으세요")
     wp_id = "api_user"
-    wp_pw = api_key
+    wp_pw = api_key if api_key else ""
 
 # 업로드 처리
 if 'generated_content' in st.session_state:
