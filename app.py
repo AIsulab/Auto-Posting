@@ -320,7 +320,7 @@ TRENDING_KEYWORDS = {
 
 # 계절별 핫 키워드
 import datetime
-current_month = datetime.now().month
+current_month = datetime.datetime.now().month
 SEASONAL_HOT = {
     "겨울": ["다이어트", "운동", "금연", "새해계획", "독감예방", "겨울여행"],
     "봄": ["봄나들이", "알레르기", "춘곤증", "미세먼지", "벚꽃명소", "봄철건강"],
