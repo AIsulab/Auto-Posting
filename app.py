@@ -104,17 +104,27 @@ def call_huggingface_api(model_name, prompt):
     """Hugging Face 무료 API 호출"""
     api_url = f"https://api-inference.huggingface.co/models/{model_name}"
     
-    headers = {"Authorization": "Bearer hf_demo"}  # 데모용 무료 키
-    payload = {"inputs": prompt, "parameters": {"max_new_tokens": 512}}
+    headers = {}  # 무료 사용
+    payload = {
+        "inputs": prompt[:500],  # 프롬프트 길이 제한
+        "parameters": {
+            "max_new_tokens": 200,
+            "temperature": 0.7,
+            "return_full_text": False
+        }
+    }
     
     try:
-        response = requests.post(api_url, headers=headers, json=payload)
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
         if response.status_code == 200:
-            return response.json()[0]['generated_text']
+            result = response.json()
+            if isinstance(result, list) and len(result) > 0:
+                return result[0].get('generated_text', '생성 실패')
+            return str(result)
         else:
-            return f"API 오류: {response.status_code}"
-    except:
-        return "네트워크 오류가 발생했습니다."
+            return f"API 오류: {response.status_code} - 잠시 후 다시 시도해주세요"
+    except Exception as e:
+        return f"네트워크 오류: {str(e)}"
     
     # AI 블로그 글 생성 버튼
 if st.button("🚀 AI 블로그 글 생성", type="primary"):
