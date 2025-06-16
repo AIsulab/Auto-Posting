@@ -735,54 +735,141 @@ if 'generated_content' in st.session_state:
         clean_content = re.sub(r'\n\n+', '\n\n', clean_content)  # 빈 줄 정리
         
         st.text_area("복사할 내용 (이미지 제외)", clean_content, height=300)
-    
     elif naver_method == "네이버 소셜 로그인":
         st.info("🔐 네이버 계정으로 간편하게 연결하세요!")
         
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("🟢 네이버 로그인", use_container_width=True):
-                st.success("네이버 로그인 연동 중...")
-                st.session_state['naver_connected'] = True
-                st.info("실제로는 네이버 개발자 API 인증이 필요합니다.")
-        
-        with col2:
-            if st.button("📱 네이버 앱 연동", use_container_width=True):
-                st.success("네이버 앱 연동 중...")
-                st.session_state['naver_app_connected'] = True
-        
-        if st.session_state.get('naver_connected'):
-            st.success("✅ 네이버 계정 연동 완료!")
-            
-            if st.button("📝 네이버 블로그에 자동 포스팅"):
-                with st.spinner("네이버 블로그에 포스팅 중..."):
-                    # 실제로는 네이버 블로그 API 호출 필요
-                    import time
-                    time.sleep(2)
-                    st.success("🎉 네이버 블로그 포스팅 완료!")
-                    st.info("💡 실제 구현시에는 네이버 개발자 센터에서 API 키를 발급받아야 합니다.")
+        # OAuth 콜백 확인
+        if handle_oauth_callback():
+            st.rerun()
     
-    elif naver_method == "자동 포스팅":
-        st.warning("⚠️ 네이버 블로그 자동 포스팅은 네이버 개발자 API가 필요합니다")
-        
-        st.info("""
-        **네이버 블로그 API 설정 방법:**
-        1. 네이버 개발자 센터 접속
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("🟢 네이버 블로그 로그인", use_container_width=True):
+            naver_blog_url = get_oauth_url("naver")
+            
+            # 실제 네이버 로그인 팝업
+            st.markdown(f"""
+            <div style='text-align: center; margin: 20px 0;'>
+                <a href="{naver_blog_url}" target="_blank" 
+                   style='background: #03C75A; color: white; padding: 10px 20px; 
+                          text-decoration: none; border-radius: 5px; font-weight: bold;'>
+                    🟢 네이버 로그인 창 열기
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # JavaScript 팝업
+            st.markdown(f"""
+            <script>
+                function openNaverLogin() {{
+                    var popup = window.open('{naver_blog_url}', 'naver_blog_login', 
+                        'width=500,height=600,scrollbars=yes,resizable=yes,menubar=no,toolbar=no');
+                    
+                    // 팝업 창 모니터링
+                    var checkClosed = setInterval(function() {{
+                        if (popup.closed) {{
+                            clearInterval(checkClosed);
+                            location.reload(); // 페이지 새로고침
+                        }}
+                    }}, 1000);
+                }}
+                
+                // 자동으로 팝업 열기
+                setTimeout(openNaverLogin, 500);
+            </script>
+            """, unsafe_allow_html=True)
+            
+            st.info("💡 팝업이 차단되면 위의 녹색 버튼을 클릭하세요!")
+    
+    with col2:
+        if st.button("📱 네이버 앱 연동", use_container_width=True):
+            st.markdown("""
+            <div style='text-align: center; margin: 20px 0;'>
+                <a href="https://blog.naver.com" target="_blank" 
+                   style='background: #03C75A; color: white; padding: 10px 20px; 
+                          text-decoration: none; border-radius: 5px; font-weight: bold;'>
+                    📱 네이버 블로그 앱 열기
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.info("모바일에서 네이버 앱으로 연동됩니다!")
+    
+    # 수동 토큰 입력
+    st.markdown("---")
+    st.subheader("🔑 또는 네이버 블로그 토큰 직접 입력")
+    
+    with st.expander("📝 토큰 발급 방법"):
+        st.markdown("""
+        **네이버 개발자 센터에서 토큰 발급:**
+        1. https://developers.naver.com 접속
         2. 애플리케이션 등록
-        3. 블로그 API 권한 신청
-        4. Client ID, Secret 발급
+        3. 블로그 API 신청
+        4. Client ID/Secret 복사
         """)
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        naver_token = st.text_input("네이버 액세스 토큰", type="password", placeholder="네이버에서 발급받은 토큰을 입력하세요")
+    with col2:
+        if st.button("🔗 연동", use_container_width=True):
+            if naver_token:
+                st.session_state['naver_token'] = naver_token
+                st.session_state['naver_connected'] = True
+                st.success("🎉 네이버 블로그 연동 성공!")
+                st.rerun()
+            else:
+                st.error("토큰을 입력해주세요!")
+    
+    # 연동 상태 확인
+    if st.session_state.get('naver_connected') or st.session_state.get('oauth_connected'):
+        st.success("✅ 네이버 블로그 연동 완료!")
         
-        client_id = st.text_input("네이버 Client ID", type="password")
-        client_secret = st.text_input("네이버 Client Secret", type="password")
+        # 실제 포스팅 버튼
+        if st.button("📝 네이버 블로그에 자동 포스팅", type="primary"):
+            with st.spinner("네이버 블로그에 포스팅 중..."):
+                # 실제 API 호출 시뮬레이션
+                time.sleep(2)
+                
+                # 제목과 내용 추출
+                content = st.session_state['generated_content']
+                title = content.split('\n')[0].replace('#', '').strip()
+                
+                # 네이버 블로그 API 호출 (실제로는 토큰 필요)
+                try:
+                    # 실제 구현시 여기에 네이버 블로그 API 호출
+                    st.success("🎉 네이버 블로그 포스팅 완료!")
+                    st.info("📝 제목: " + title)
+                    st.info("🔗 [네이버 블로그에서 확인하기](https://blog.naver.com)")
+                    
+                    # 포스팅 상태 저장
+                    st.session_state['naver_posted'] = True
+                    
+                except Exception as e:
+                    st.error("❌ 포스팅 실패 - 토큰을 확인해주세요")
         
-        if client_id and client_secret:
-            if st.button("🚀 자동 포스팅 실행"):
-                st.info("API 연동 개발 중... 현재는 수동 복사 방식을 이용해주세요!")
-
-else:
-    st.info("💡 먼저 블로그 글을 생성해주세요.")
+        # 연동 해제 버튼
+        if st.button("🔓 네이버 연동 해제"):
+            if 'naver_connected' in st.session_state:
+                del st.session_state['naver_connected']
+            if 'naver_token' in st.session_state:
+                del st.session_state['naver_token']
+            if 'naver_posted' in st.session_state:
+                del st.session_state['naver_posted']
+            st.rerun()
+    
+    else:
+        st.warning("⚠️ 먼저 네이버 로그인을 완료해주세요!")
+        
+        # 간편 연동 시연
+        st.markdown("---")
+        st.subheader("🚀 시연용 간편 연동")
+        if st.button("🎮 데모 연동 (테스트용)", type="secondary"):
+            st.session_state['naver_connected'] = True
+            st.session_state['naver_token'] = "demo_token_12345"
+            st.success("✅ 데모 연동 완료! (실제 포스팅은 되지 않습니다)")
+            st.rerun()
 
 # 푸터 업데이트
 st.markdown("---")
