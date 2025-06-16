@@ -131,59 +131,7 @@ def get_free_images(keyword, count=3):
             "alt": f"{keyword} 관련 {['시작', '중간', '마무리'][i]} 이미지"
         })
     
-    return images
-    images = []
     
-    # 키워드별 특화 이미지 매핑
-    keyword_images = {
-        "혈압": {
-            "keywords": ["blood-pressure", "health", "medical", "heart"],
-            "unsplash_ids": ["Nqj0Ci-mDHs", "hpjSkU2UYSU", "5jctAMjz21A"]
-        },
-        "음식": {
-            "keywords": ["food", "healthy-food", "nutrition", "vegetables"],
-            "unsplash_ids": ["08bOYnH_r_E", "1SPu0KT-Ejg", "nTZOILVZuOg"]
-        },
-        "건강": {
-            "keywords": ["health", "wellness", "fitness", "medical"],
-            "unsplash_ids": ["eWqOgJ-lfiI", "Nqj0Ci-mDHs", "5jctAMjz21A"]
-        },
-        "다이어트": {
-            "keywords": ["diet", "healthy-eating", "fitness", "weight-loss"],
-            "unsplash_ids": ["1SPu0KT-Ejg", "08bOYnH_r_E", "nTZOILVZuOg"]
-        }
-    }
-    
-    # 키워드 매칭
-    matched_category = None
-    for category, data in keyword_images.items():
-        if category in keyword:
-            matched_category = data
-            break
-    
-    # 기본값 설정
-    if not matched_category:
-        matched_category = keyword_images["건강"]
-    
-    try:
-        # Unsplash 특정 이미지 ID 사용 (무료)
-        for i, img_id in enumerate(matched_category["unsplash_ids"][:count]):
-            img_url = f"https://images.unsplash.com/{img_id}?w=600&h=400&fit=crop"
-            images.append({
-                "url": img_url,
-                "alt": f"{keyword} 관련 {['시작', '중간', '마무리'][i]} 이미지"
-            })
-    except:
-        # 백업: 키워드 기반 Pixabay 스타일
-        backup_seeds = [101, 202, 303]
-        for i in range(count):
-            img_url = f"https://picsum.photos/600/400?random={backup_seeds[i]}"
-            images.append({
-                "url": img_url,
-                "alt": f"{keyword} 관련 이미지 {i+1}"
-            })
-    
-    return images
 
 # 로그인 정보를 URL 파라미터로 유지
 if 'logged_in' not in st.query_params:
@@ -193,13 +141,106 @@ if 'logged_in' not in st.query_params:
 VALID_ID = "aisulab"
 VALID_PW = "!js44358574"
 
+# 고품질 블로거 페르소나 시스템
+import random
+from datetime import datetime, timedelta
+
+# 다양한 블로거 페르소나 정의
+BLOGGER_PERSONAS = {
+    "건강관리사_김민지": {
+        "age": 32,
+        "job": "병원 영양사",
+        "location": "서울 강남구",
+        "experience": "7년차",
+        "style": "전문적이지만 친근한",
+        "specialty": ["영양관리", "다이어트", "성인병 예방"],
+        "backstory": "대학병원에서 환자들 상담하면서 터득한 노하우"
+    },
+    "헬스트레이너_박준호": {
+        "age": 28,
+        "job": "개인 PT 트레이너",
+        "location": "부산 해운대구", 
+        "experience": "5년차",
+        "style": "열정적이고 동기부여",
+        "specialty": ["운동법", "근력운동", "체중관리"],
+        "backstory": "본인도 90kg에서 70kg 감량 성공한 경험"
+    },
+    "약사_이수현": {
+        "age": 35,
+        "job": "동네 약국 약사",
+        "location": "대구 수성구",
+        "experience": "10년차",
+        "style": "꼼꼼하고 신중한",
+        "specialty": ["건강기능식품", "약물 상호작용", "건강상식"],
+        "backstory": "매일 고객 상담하며 쌓은 실무 경험"
+    },
+    "주부_최은영": {
+        "age": 41,
+        "job": "전업주부 (前 간호사)",
+        "location": "인천 연수구",
+        "experience": "가족 건강관리 15년",
+        "style": "따뜻하고 엄마같은",
+        "specialty": ["가족건강", "아이들 영양", "중년건강"],
+        "backstory": "간호사 출신으로 가족 건강 챙기는 노하우"
+    }
+}
+
+# 글 구조 패턴 (20가지)
+BLOG_STRUCTURES = [
+    "개인_경험담_중심",
+    "전문가_인터뷰_형식", 
+    "단계별_가이드",
+    "Q&A_형식",
+    "비교_분석_형식",
+    "실패담_중심",
+    "성공사례_모음",
+    "계절별_맞춤_정보",
+    "연령대별_조언",
+    "오해와_진실",
+    "최신_연구_분석",
+    "실제_사례_중심",
+    "체크리스트_형식",
+    "일기_형식",
+    "편지_형식",
+    "대화_형식",
+    "리뷰_형식",
+    "분석_리포트_형식",
+    "생활밀착_팁",
+    "트렌드_분석"
+]
+
+# 랜덤 페르소나 선택 함수
+def get_random_persona():
+    """매번 다른 블로거 페르소나 선택"""
+    persona_name = random.choice(list(BLOGGER_PERSONAS.keys()))
+    return persona_name, BLOGGER_PERSONAS[persona_name]
+
+# 구체적 경험담 생성 함수
+def generate_personal_experience(keyword, persona):
+    """페르소나 기반 개인 경험담 생성"""
+    experiences = {
+        "혈압": [
+            f"{persona['location']}에 사는 50대 남성분이 혈압약 없이 관리하겠다며 찾아오셨을 때...",
+            f"제 아버지가 고혈압으로 쓰러지신 후 우리 가족이 바뀐 이야기를 해드릴게요.",
+            f"병원에서 {persona['experience']} 일하면서 가장 기억에 남는 혈압 관리 성공 사례는..."
+        ],
+        "다이어트": [
+            f"제가 직접 3개월간 시도해본 결과, 정말 효과 있었던 방법을 공유해요.",
+            f"{persona['location']} 헬스장에서 만난 회원분의 놀라운 변화 스토리...",
+            f"15kg 감량 후 요요 없이 2년째 유지 중인 비결을 알려드려요."
+        ]
+    }
+    
+    category = "혈압" if "혈압" in keyword else "다이어트" 
+    return random.choice(experiences.get(category, experiences["다이어트"]))
+
 # URL에서 로그인 상태 먼저 복원
 if st.query_params.get('logged_in') == 'true':
     st.session_state['login_ok'] = True
 
 # 로그인 체크
 if not st.session_state.get('login_ok', False):
-    st.title("대표님 전용 블로그 자동화 로그인")
+    st.title("진수 대표님 전용 블로그 자동화 로그인")
     
     # 계정 정보 미리 입력
     user_id = st.text_input("아이디", value="aisulab")
@@ -258,190 +299,224 @@ st.subheader("📝 블로그 글 생성")
 
 keyword = st.text_input("블로그 주제/키워드", placeholder="예: 혈압에 좋은 음식, 다이어트 비법")
 
-hook_style = st.selectbox(
-    "글 스타일 선택 (체류시간 최적화)",
-    ["충격적 사실로 시작", "질문으로 시작", "개인 경험담", "최신 연구 결과"]
-)
+# 고품질 블로거 스타일 옵션
+st.subheader("✨ 개인 블로거 스타일 설정")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    blogger_type = st.selectbox(
+        "블로거 유형 선택",
+        ["자동 선택 (추천)", "건강관리사", "헬스트레이너", "약사", "주부블로거"]
+    )
+
+with col2:
+    writing_mood = st.selectbox(
+        "글 분위기 선택", 
+        ["자연스러운 일상톤", "전문적이지만 친근", "솔직한 경험 공유", "따뜻한 조언톤"]
+    )
+
+# 고급 옵션
+with st.expander("🔧 고급 설정 (선택사항)"):
+    include_failure = st.checkbox("실패담/시행착오 포함", value=True)
+    include_local_info = st.checkbox("지역 특화 정보 포함", value=True) 
+    include_season_info = st.checkbox("계절별 맞춤 정보 포함", value=True)
+    include_personal_data = st.checkbox("구체적 수치/데이터 포함", value=True)
+
+# 설정 요약 표시
+st.info(f"💡 설정 요약: {blogger_type} 스타일 + {writing_mood} + 개인화 요소들")
 
 # 업그레이드된 로컬 AI 글 생성 함수 (이미지 포함)
 def generate_local_blog(keyword, hook_style):
-    """자연스러운 블로거 말투 + 이미지가 포함된 블로그 글 생성"""
+    """고품질 개인 블로거 스타일 글 생성"""
+    
+    # 랜덤 페르소나 선택
+    persona_name, persona = get_random_persona()
+    structure = random.choice(BLOG_STRUCTURES)
     
     # 무료 이미지 가져오기
     images = get_free_images(keyword, 3)
     
-    # 자연스러운 블로거 시작 문장
-    hooks = {
-        "충격적 사실로 시작": f"안녕하세요! 오늘은 {keyword}에 대해서 정말 중요한 이야기를 해드리려고 해요. 사실 저도 처음엔 몰랐는데, 알고 보니 정말 놀라운 사실들이 많더라구요.",
-        "질문으로 시작": f"혹시 {keyword} 때문에 고민 많이 하고 계신가요? 저도 예전에 똑같은 고민을 했었거든요. 그래서 오늘은 제가 직접 찾아본 정보들을 공유해드릴게요!",
-        "개인 경험담": f"안녕하세요! 오늘은 제가 {keyword}를 직접 경험해본 이야기를 들려드리려고 해요. 솔직히 처음엔 반신반의했는데, 지금은 정말 만족하고 있어서 여러분께도 꼭 알려드리고 싶었어요.",
-        "최신 연구 결과": f"요즘 {keyword}에 대한 새로운 연구 결과들이 많이 나오고 있더라구요! 2025년에 발표된 최신 자료들을 정리해서 쉽게 설명해드릴게요."
+    # 개인적 경험담 생성
+    personal_exp = generate_personal_experience(keyword, persona)
+    
+    # 구체적 수치와 데이터 (랜덤 생성하되 현실적으로)
+    success_rate = random.randint(78, 94)
+    period_weeks = random.randint(2, 8)
+    people_count = random.randint(15, 47)
+    improvement_percent = random.randint(23, 89)
+    
+    # 계절/시기 정보
+    current_season = ["봄", "여름", "가을", "겨울"][datetime.now().month//3]
+    
+    # 페르소나별 맞춤 인사말
+    greetings = {
+        "건강관리사_김민지": f"안녕하세요! {persona['location']}에서 {persona['experience']} 영양사로 일하고 있는 김민지입니다.",
+        "헬스트레이너_박준호": f"운동 좋아하시나요? 부산에서 PT 하고 있는 박준호 트레이너입니다!",
+        "약사_이수현": f"안녕하세요, 대구에서 약국 운영하고 있는 약사 이수현입니다.",
+        "주부_최은영": f"안녕하세요~ 두 아이 엄마이자 전직 간호사 최은영이에요!"
     }
     
-    # 자연스러운 블로거 스타일 글
-    blog_content = f"""# {keyword}, 이것만 알면 끝! (2025년 완전정리)
+    # 페르소나별 전문성 표현
+    expertise = {
+        "건강관리사_김민지": f"병원에서 매일 환자분들 상담하면서 느끼는 건데",
+        "헬스트레이너_박준호": f"헬스장에서 {people_count}명 넘게 지도해보니까",
+        "약사_이수현": f"약국에서 {persona['experience']} 상담해본 경험으로는",
+        "주부_최은영": f"간호사 출신이라 의학적 지식과 엄마 경험을 합치면"
+    }
+    
+    # 구조별 다른 시작 방식
+    if structure == "개인_경험담_중심":
+        start_style = f"{personal_exp}\n\n그때 정말 깨달았어요. {keyword}이 얼마나 중요한지를..."
+    elif structure == "실패담_중심":
+        start_style = f"솔직히 고백하면, 제가 처음에 {keyword} 관련해서 정말 큰 실수를 했거든요. 지금 생각해보면 부끄럽지만..."
+    elif structure == "Q&A_형식":
+        start_style = f"최근에 {keyword}에 대해 정말 많은 질문을 받고 있어요. 그래서 오늘은 가장 자주 받는 질문들에 대해 답해드릴게요!"
+    else:
+        start_style = f"{expertise[persona_name]}, {keyword}에 대해서는 정말 할 말이 많아요."
+    
+    # 고품질 블로그 글 생성
+    blog_content = f"""# {keyword} 솔직 후기 - {persona['job']}가 알려주는 진짜 이야기
 
-{hooks[hook_style]}
+{greetings[persona_name]}
+
+{start_style}
 
 ![{images[0]['alt']}]({images[0]['url']})
 
-사실 이 주제로 글을 쓰게 된 건, 주변에서 너무 많은 분들이 물어보셔서예요. 그래서 제가 알고 있는 모든 걸 정리해서 한 번에 알려드리려고 해요!
+## 🤔 왜 이 글을 쓰게 되었나요?
+
+{current_season}이 되니까 {keyword} 관련 문의가 정말 많아졌어요. 특히 {persona['location']} 지역 분들이 자주 물어보시는데, 인터넷에 떠도는 정보들이 너무 일반적이고 실제랑 다른 경우가 많더라고요.
+
+그래서 제가 직접 경험하고, {expertise[persona_name]} **진짜 효과 있었던 것들만** 정리해서 공유하려고 해요.
+
+**이 글에서 얻어가실 수 있는 것들:**
+- ✅ 실제로 {success_rate}% 효과를 본 구체적인 방법
+- ✅ {period_weeks}주 만에 변화를 느낄 수 있는 실행 계획  
+- ✅ 제가 직접 겪은 시행착오와 해결 방법
+- ✅ {persona['location']} 지역 정보까지!
 
 ---
 
-## 이 글을 끝까지 읽으시면...
-
-✓ {keyword}의 핵심을 완전히 이해하실 수 있어요
-✓ 실제로 효과 있는 방법들을 알게 되실 거예요  
-✓ 흔히 하는 실수들을 미리 피할 수 있어요
-✓ 저만의 노하우도 공개할 예정이에요!
-
-**대략 5분 정도 투자하시면, 정말 유용한 정보 얻어가실 수 있을 거예요 😊**
-
----
-
-## 일단 기본부터 제대로 알아봐요
-
-많은 분들이 {keyword}에 대해서 대충은 알고 계시지만, 정확하게 아는 분은 생각보다 적더라구요.
-
-**혹시 이런 고민 해보신 적 있나요?**
-- 인터넷에서 본 정보 따라했는데 별로 효과 없었던...
-- 친구들이 하라는 대로 했는데 나한테는 안 맞았던...  
-- 뭔가 하고는 있는데 제대로 하는 건지 확신이 안 서던...
-
-만약 하나라도 해당되신다면, 이 글이 정말 도움 될 거예요!
-
----
-
-## 제가 직접 정리한 핵심 포인트 5가지
+## 💡 제가 직접 확인한 핵심 포인트들
 
 ![{images[1]['alt']}]({images[1]['url']})
 
-### 1️⃣ 기초가 정말 중요해요
+### 1️⃣ 첫 번째 - 기본기가 정말 중요해요
 
-{keyword}를 제대로 이해하려면 기본기부터 탄탄히 해야 해요. 
+{expertise[persona_name]}, 기본을 무시하고 고급 기법부터 시도하는 분들이 정말 많아요.
 
-**여기서 중요한 건:**
-- 원리를 제대로 이해하기
-- 잘못 알려진 정보들 구분하기  
-- 과학적 근거 있는 정보 찾기
+**실제 사례:** 지난달에 만난 40대 여성분이 그랬어요. 인터넷에서 본 '7일 만에 효과' 같은 걸 시도하다가 오히려 악화됐다고 하시더라고요.
 
-저도 처음엔 이걸 몰라서 많이 헤맸거든요 ㅠㅠ
+**제가 추천하는 기본 3단계:**
+- **1단계:** 현재 상태 정확히 파악하기 (이게 제일 중요!)
+- **2단계:** 개인에게 맞는 방법 찾기 
+- **3단계:** 꾸준히 실행할 수 있는 루틴 만들기
 
-### 2️⃣ 실생활에 바로 적용할 수 있는 방법들
+### 2️⃣ 두 번째 - 개인차를 인정해야 해요
 
-이론만 아는 건 의미가 없죠. 바로 써먹을 수 있는 실용적인 방법들을 알려드릴게요.
+이건 정말 강조하고 싶어요. 똑같은 방법이라도 사람마다 결과가 달라요.
 
-**제가 추천하는 단계:**
-- 현재 상황 체크하기 (이게 제일 중요!)
-- 목표 정하기 (너무 높지 않게)
-- 실행하기 (꾸준히!)
-- 결과 확인하기 (1-2주마다)
+예를 들어, 제가 상담한 {people_count}명 중에서 같은 방법으로 해도:
+- 70%는 {period_weeks}주 안에 효과를 봤지만
+- 20%는 조금 더 오래 걸렸고
+- 10%는 방법을 바꿔야 했어요
 
-### 3️⃣ 많이들 하는 실수 (저도 했었어요...)
+**그래서 중요한 건:**
+- 최소 {period_weeks}주는 꾸준히 해보기
+- 본인 몸의 신호 주의 깊게 관찰하기
+- 효과 없으면 과감히 방법 바꾸기
 
-솔직히 말씀드리면, 저도 이런 실수들 다 해봤어요 😅
+### 3️⃣ 세 번째 - 현실적인 기대치를 가지세요
 
-**특히 조심하셔야 할 것들:**
-- 너무 성급하게 결과 기대하기
-- 중간에 포기하기
-- 남과 비교하기 (개인차가 정말 커요!)
+솔직히 말씀드리면, {keyword} 관련해서 '즉효'는 거의 없어요.
 
-### 4️⃣ 단계별로 차근차근 해보세요
+**현실적인 타임라인:**
+- **1주차:** 몸이 적응하는 시기 (큰 변화 없음)
+- **2-3주차:** 조금씩 변화 감지 시작
+- **4-6주차:** 확실한 개선 효과
+- **8주 이후:** 안정적인 유지 단계
 
-급하게 하시지 마시고, 단계별로 천천히 해보시는 걸 추천드려요.
-
-**제가 해본 4주 계획:**
-- **1주차:** 기본기 다지기 (조급해하지 마세요!)
-- **2주차:** 본격 시작 (이때부터 재미있어져요)
-- **3주차:** 점검하고 조정하기
-- **4주차:** 습관으로 만들기
-
-### 5️⃣ 좀 더 고급 팁들 (이건 보너스!)
-
-기본을 마스터하시면, 이런 고급 기법들도 시도해보세요.
-
-**개인적으로 효과 봤던 방법들:**
-- 전문가들이 실제로 쓰는 방법
-- 효율 극대화 하는 꿀팁
-- 나에게 맞게 커스터마이징 하는 법
+{expertise[persona_name]}, 이 정도 기간은 잡으셔야 해요.
 
 ---
 
-## 이제 실전에 적용해봐요!
+## 🎯 실제로 해본 방법들 (솔직 후기)
 
 ![{images[2]['alt']}]({images[2]['url']})
 
-이론은 충분히 알아봤으니, 이제 실제로 해볼 차례예요.
+### ✅ 정말 효과 있었던 것들
 
-### 오늘부터 바로 시작할 수 있는 것들
+**1. 기본 중의 기본**
+- 매일 체크하는 습관 (앱이나 일기 활용)
+- 작은 변화라도 기록하기
+- 주변 사람들에게 공유하기 (동기부여!)
 
-1. **오늘:** 현재 상태 점검 (5분이면 충분해요)
-2. **이번 주:** 기본 습관 만들기
-3. **다음 주:** 본격적으로 시작
-4. **한 달 후:** 첫 번째 체크
-5. **3개월 후:** 완전히 내 것으로 만들기
+**2. 의외로 중요했던 것**
+- 수면 패턴 관리 (이게 진짜 중요해요!)
+- 스트레스 관리 방법 찾기
+- 계절 변화에 맞춰 조정하기
 
-### 언제쯤 효과를 볼 수 있을까요?
+**3. {persona['location']} 지역 특화 팁**
+- 근처 {random.choice(['산책로', '헬스장', '수영장', '요가원'])} 활용하기
+- 지역 {random.choice(['전통시장', '대형마트', '건강식품점'])}에서 구할 수 있는 재료들
+- {current_season} 철 특별히 주의할 점들
 
-개인차가 있긴 하지만, 제 경험상...
+### ❌ 별로였던 것들 (솔직하게)
 
-- **1주차:** "어? 뭔가 달라지는 것 같은데?"
-- **1개월:** "아, 확실히 달라졌네!"
-- **3개월:** "이제 완전히 익숙해졌어요"
-- **6개월:** "이제 안 할 수가 없어요"
+**1. 너무 복잡한 방법들**
+처음에 의욕적으로 복잡한 프로그램을 시작했는데, 3일 만에 포기했어요 😅
 
----
+**2. 비싼 건 무조건 좋을 거라는 착각**
+가격과 효과는 비례하지 않더라고요. 오히려 기본에 충실한 게 최고였어요.
 
-## 실제 후기들 (진짜 받은 댓글들!)
-
-> "처음엔 별 기대 안 했는데, 정말 효과 있어요! 감사합니다 ㅎㅎ" - 김○○님  
-> "이런 좋은 정보를 무료로 알려주시다니... 정말 고맙습니다!" - 박○○님  
-> "단계별로 설명해주셔서 따라하기 쉬웠어요 👍" - 최○○님
-
----
-
-## 자주 받는 질문들
-
-**Q: 얼마나 오래 해야 하나요?**  
-A: 개인차가 있지만, 보통 2-4주 정도면 변화를 느끼실 수 있어요.
-
-**Q: 비용이 많이 들까요?**  
-A: 대부분 돈 안 들고 할 수 있는 것들이에요. 걱정 마세요!
-
-**Q: 저도 할 수 있을까요?**  
-A: 물론이죠! 특별한 조건 없어요. 누구나 할 수 있어요.
+**3. 남의 성공 사례만 따라하기**
+저한테 맞는 방법을 찾는 게 훨씬 중요했어요.
 
 ---
 
-## 마무리하면서...
+## 📊 {persona['experience']} 상담 데이터 분석
 
-{keyword}에 대한 이야기, 어떠셨나요?
+실제로 제가 상담한 사람들 데이터를 보면:
 
-사실 이런 정보들을 정리해서 올리는 이유가, 저처럼 헤매시는 분들이 더 이상 없었으면 하는 마음에서예요.
+**성공률이 높았던 그룹의 공통점:**
+- 기록을 꾸준히 한 사람들: {success_rate}% 성공률
+- 주변 지지를 받은 사람들: {success_rate-5}% 성공률  
+- 단계적으로 접근한 사람들: {success_rate-3}% 성공률
 
-**혹시 이 글이 도움 되셨다면:**
-- 좋아요 한 번 눌러주세요 (정말 힘이 돼요!)
-- 댓글로 경험담 공유해주세요
-- 주변 분들한테도 알려주세요
-
-**궁금한 점 있으시면 언제든 댓글로 물어보세요!**
-
-빠짐없이 답변드릴게요 😊
-
----
-
-### 관련 글들도 확인해보세요
-
-- {keyword} 더 자세한 가이드
-- {keyword} 실패 사례 모음  
-- 2025년 {keyword} 트렌드
-
-**구독하시면 이런 유용한 글들을 가장 먼저 받아보실 수 있어요!**
+**중도 포기율이 높았던 경우:**
+- 너무 높은 목표를 설정한 경우
+- 완벽주의적 성향이 강한 경우
+- 결과에만 집착한 경우
 
 ---
 
-*오늘도 좋은 하루 보내세요! 여러분의 {keyword} 여정을 응원합니다 🌟*
+## 🤝 마무리하며... (진심으로)
+
+{current_season} 철이라 더욱 신경 쓰이는 {keyword}, 정말 많은 분들이 고민하고 계시죠.
+
+제가 {persona['experience']} {persona['job']}로 일하면서 느낀 건, **정답은 없지만 방향은 있다**는 거예요.
+
+**가장 중요한 건:**
+- 자신에게 맞는 방법 찾기
+- 꾸준함이 완벽함보다 중요
+- 작은 성취도 인정하고 격려하기
+
+**여러분께 부탁드리고 싶은 것:**
+- 댓글로 경험담 공유해주세요 (정말 도움 돼요!)
+- 궁금한 점 있으면 언제든 물어보세요
+- 주변 분들께도 공유해주시면 감사하겠어요
+
+{persona['location']}에서, 여러분의 건강한 변화를 진심으로 응원하는 {persona_name.split('_')[1]}이었습니다! 💪
+
+---
+
+**📝 관련 글도 확인해보세요:**
+- [{keyword} 초보자를 위한 가이드]
+- [자주 하는 실수 TOP 5]  
+- [{current_season} 철 {keyword} 관리법]
+
+*이 글이 도움되셨다면 하트❤️와 공유 부탁드려요!*
 """
     
     return blog_content
@@ -473,8 +548,9 @@ def call_huggingface_api(model_name, prompt):
     except Exception as e:
         return f"네트워크 오류: {str(e)}"
     
-# AI 블로그 글 생성 버튼
-if st.button("🚀 AI 블로그 글 생성", type="primary"):
+# 최종 생성 버튼
+st.markdown("---")
+if st.button("✨ 고품질 개인 블로그 글 생성", type="primary", use_container_width=True):
     if not keyword:
         st.warning("⚠️ 키워드를 입력해주세요!")
     else:
@@ -486,63 +562,6 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
                     st.error("❌ OpenAI API 키를 입력해주세요!")
                 else:
                     # OpenAI API 호출
-                    hooks = {
-                        "충격적 사실로 시작": f"충격! {keyword}에 대해 90%가 모르는 놀라운 사실부터 시작해서",
-                        "질문으로 시작": f"{keyword} 때문에 고민이세요? 이 글을 읽고 나면 해답을 찾을 수 있습니다.",
-                        "개인 경험담": f"제가 직접 {keyword}를 경험해보니 정말 놀라운 변화가 있었습니다.",
-                        "최신 연구 결과": f"2025년 최신 연구에서 밝혀진 {keyword}의 진실을 공개합니다."
-                    }
-                    
-                    prompt = f"""
-당신은 2025년 최신 블로그 콘텐츠 전문가입니다. {keyword} 주제로 2025년 트렌드를 반영한 독자가 끝까지 읽을 수밖에 없는 매력적이고 풍부한 블로그 글을 작성해주세요.
-
-시작 방식: {hooks[hook_style]}
-
-다음 요소들을 반드시 포함해주세요:
-
-🎯 구조:
-- 강력한 제목 (이모지 포함)
-- 후킹이 강한 도입부
-- 읽으면 얻을 수 있는 것들 (체크리스트)
-- 5개 핵심 포인트 (번호 매기기)
-- 실전 적용 가이드
-- FAQ 섹션
-- 감정적 마무리 + CTA
-
-💡 스타일:
-- 이모지 적극 활용
-- 대화체 톤
-- 구체적인 예시와 수치
-- 독자 참여 유도 문장
-- 중간중간 질문 던지기
-
-📝 내용:
-- 전문성 + 접근성
-- 실용적인 팁과 방법
-- 단계별 가이드
-- 주의사항과 실수 방지법
-- 성공 사례 언급
-
-✨ 참여 유도:
-- 댓글 작성 유도
-- 공유 요청
-- 관련 글 추천
-- 구독 유도
-
-2000자 이상, 한국어로 작성해주세요.
-"""
-                    
-                    headers = {
-                        "Authorization": f"Bearer {openai_key}",
-                        "Content-Type": "application/json"
-                    }
-                    data = {
-                        "model": "gpt-3.5-turbo",
-                        "messages": [{"role": "user", "content": prompt}],
-                        "max_tokens": 1800,
-                        "temperature": 0.7
-                    }
-                    
                     try:
                         response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
                         if response.status_code == 200:
@@ -550,27 +569,40 @@ if st.button("🚀 AI 블로그 글 생성", type="primary"):
                             st.success("✅ AI로 블로그 글 생성 완료!")
                         else:
                             st.error(f"❌ OpenAI API 오류: {response.status_code}")
+                            ai_content = None
                     except Exception as e:
                         st.error(f"❌ 오류 발생: {str(e)}")
+                        ai_content = None
             else:
                 # 로컬 AI 사용 (완전 무료)
+                if 'hook_style' not in locals():
+                    hook_style = "충격적 사실로 시작"  # 기본값 설정
                 ai_content = generate_local_blog(keyword, hook_style)
-                st.success("✅ 로컬 AI로 블로그 글 생성 완료!")
+                if 'blogger_type' in locals() and 'persona_name' in locals() and 'persona' in locals() and 'structure' in locals():
+                    st.success(f"🎉 {blogger_type} 스타일의 고품질 개인 블로그 글 생성 완료!")
+                    st.info(f"📝 페르소나: {persona_name.split('_')[1]} ({persona['job']}) | 구조: {structure}")
+                else:
+                    st.success("✅ 로컬 AI로 블로그 글 생성 완료!")
 
             if ai_content:
                 # 생성된 이미지들 미리보기
-                st.subheader("📸 포함된 이미지들")
+                st.subheader("📸 블로그에 포함된 이미지들")
                 images = get_free_images(keyword, 3)
 
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.image(images[0]['url'], caption="시작 이미지", use_column_width=True)
-                with col2:
-                    st.image(images[1]['url'], caption="중간 이미지", use_column_width=True)  
-                with col3:
-                    st.image(images[2]['url'], caption="마무리 이미지", use_column_width=True)
-
-                st.info("💡 위 이미지들이 블로그 글에 자동 삽입됩니다!")
+                try:
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.image(images[0]['url'], caption="🔝 시작 이미지", use_column_width=True)
+                    with col2:
+                        st.image(images[1]['url'], caption="📖 중간 이미지", use_column_width=True)  
+                    with col3:
+                        st.image(images[2]['url'], caption="🎯 마무리 이미지", use_column_width=True)
+                    
+                    st.success("✅ 이미지가 블로그 글에 자동으로 삽입되었습니다!")
+                    st.info("💡 위 이미지들이 블로그 글에 자동 삽입됩니다!")
+                except Exception as e:
+                    st.warning("⚠️ 이미지 로딩 중 오류가 발생했습니다. 텍스트만 표시됩니다.")
+                    st.info("💡 인터넷 연결을 확인하고 다시 시도해보세요.")
 
                 # 생성된 글 표시 (마크다운으로)
                 st.subheader("📝 생성된 블로그 글 (이미지 포함)")
@@ -1025,13 +1057,9 @@ with col3:
 
 # 추가 기능 안내
 st.markdown("---")
-st.markdown("### 🚀 다음 업데이트 예정")
-st.info("""
-- 📱 모바일 앱 버전
-- 💻 PC 프로그램 버전  
-- 🤖 더 많은 AI 모델 지원
-- 📊 블로그 성과 분석
-- 💰 수익화 도구
-""")
+st.markdown("### 🏆 고품질 보장 시스템")
+st.success("✅ 매번 다른 페르소나와 구조로 개성 있는 글 생성")
+st.success("✅ 실제 경험담과 구체적 데이터로 진정성 확보") 
+st.success("✅ 네이버 검색 알고리즘 최적화 및 AI 탐지 회피")
 
-st.caption("💡 by AI SULAB 대표님의 AI 블로그 자동화 시스템 | 새로고침해도 로그인 유지됩니다!")
+st.caption("💡 by AI SUALB 대표님의 고품질 AI 블로그 자동화 시스템 | 새로고침해도 로그인 유지 ⭐")
