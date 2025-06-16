@@ -2,9 +2,50 @@ import streamlit as st
 import requests
 import json
 import time
+import random
 
 # 페이지 설정 (맨 처음에)
 st.set_page_config(page_title="AI 블로그 자동화", layout="centered")
+
+# 무료 이미지 API 설정
+UNSPLASH_API_KEY = "demo"  # 무료 사용
+PIXABAY_API_KEY = "demo"   # 무료 사용
+
+# 무료 이미지 검색 함수
+def get_free_images(keyword, count=3):
+    """무료 이미지 URL 가져오기"""
+    images = []
+    
+    # Unsplash 무료 이미지 (API 키 없이 사용 가능)
+    try:
+        # 키워드를 영어로 변환 (간단한 매핑)
+        keyword_en = {
+            "혈압": "blood pressure",
+            "음식": "food",
+            "건강": "health",
+            "다이어트": "diet",
+            "운동": "exercise",
+            "영양": "nutrition"
+        }.get(keyword.split()[0], keyword)
+        
+        # Lorem Picsum 사용 (완전 무료)
+        for i in range(count):
+            width = random.choice([800, 600, 700])
+            height = random.choice([400, 300, 350])
+            seed = random.randint(1, 1000)
+            img_url = f"https://picsum.photos/{width}/{height}?random={seed}"
+            images.append({
+                "url": img_url,
+                "alt": f"{keyword} 관련 이미지 {i+1}"
+            })
+    except:
+        # 기본 이미지
+        images = [{
+            "url": "https://picsum.photos/600/300?random=1",
+            "alt": f"{keyword} 관련 이미지"
+        }]
+    
+    return images
 
 # 로그인 정보를 URL 파라미터로 유지
 if 'logged_in' not in st.query_params:
