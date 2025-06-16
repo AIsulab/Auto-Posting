@@ -588,7 +588,7 @@ def generate_local_blog(keyword, hook_style):
 
 ## 🤔 왜 이 글을 쓰게 되었나요?
 
-{current_season}이 되니까 {keyword} 관련 문의가 정말 많아졌어요. 특히 {persona['location']} 지역 분들이 자주 물어보시는데, 인터넷에 떠도는 정보들이 너무 일반적이고 실제랑 다른 경우가 많더라고요.
+{current_season}이 되니까 {keyword} 관련 문의가 정말 많아졌어요. 특히 전국 각지 분들이 자주 물어보시는데, 인터넷에 떠도는 정보들이 너무 일반적이고 실제랑 다른 경우가 많더라고요.
 
 그래서 제가 직접 경험하고, {expertise[persona_name]} **진짜 효과 있었던 것들만** 정리해서 공유하려고 해요.
 
@@ -596,7 +596,7 @@ def generate_local_blog(keyword, hook_style):
 - ✅ 실제로 {success_rate}% 효과를 본 구체적인 방법
 - ✅ {period_weeks}주 만에 변화를 느낄 수 있는 실행 계획  
 - ✅ 제가 직접 겪은 시행착오와 해결 방법
-- ✅ {persona['location']} 지역 정보까지!
+- ✅ 전국 각지 정보까지!
 
 ---
 
@@ -709,7 +709,7 @@ def generate_local_blog(keyword, hook_style):
 - 궁금한 점 있으면 언제든 물어보세요
 - 주변 분들께도 공유해주시면 감사하겠어요
 
-{persona['location']}에서, 여러분의 건강한 변화를 진심으로 응원하는 {persona_name.split('_')[1]}이었습니다! 💪
+제가 활동하는 지역에서, 여러분의 건강한 변화를 진심으로 응원하는 {persona_name.split('_')[1]}이었습니다! 💪
 
 ---
 
