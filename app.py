@@ -36,9 +36,8 @@ def get_current_season():
         return "겨울"
 
 def generate_local_blog(keyword, hook_style):
-    """고품질 개인 블로거 스타일 글 생성"""
+    """키워드별 맞춤 고품질 블로그 생성"""
     
-    # ===== 5단계 + 6단계: 여기부터 추가 =====
     current_season = get_current_season()
     
     def detect_keyword_category(keyword):
@@ -46,6 +45,10 @@ def generate_local_blog(keyword, hook_style):
         ai_keywords = ["AI", "인공지능", "챗GPT", "로봇", "자동화", "머신러닝", "딥러닝"]
         health_keywords = ["건강", "다이어트", "운동", "혈압", "당뇨", "면역력", "영양", "의료"]
         finance_keywords = ["투자", "재테크", "주식", "부동산", "비트코인", "펀드", "적금", "대출"]
+        travel_keywords = ["여행", "국내여행", "해외여행", "캠핑", "맛집", "카페", "제주도", "부산여행"]
+        education_keywords = ["육아", "교육", "학습법", "입시", "영어공부", "자격증", "취업", "이직"]
+        lifestyle_keywords = ["정리정돈", "인테리어", "패션", "뷰티", "반려동물", "가전제품"]
+        trend_keywords = ["MZ세대", "ESG", "지속가능", "친환경", "제로웨이스트", "비건"]
         
         if any(ai_word in keyword for ai_word in ai_keywords):
             return "AI/기술"
@@ -53,8 +56,31 @@ def generate_local_blog(keyword, hook_style):
             return "건강"  
         elif any(finance_word in keyword for finance_word in finance_keywords):
             return "재테크"
-        else:
+        elif any(travel_word in keyword for travel_word in travel_keywords):
+            return "여행"
+        elif any(edu_word in keyword for edu_word in education_keywords):
+            return "육아교육"
+        elif any(life_word in keyword for life_word in lifestyle_keywords):
             return "라이프스타일"
+        else:
+            return "트렌드"
+    
+    keyword_category = detect_keyword_category(keyword)
+    
+    if keyword_category == "AI/기술":
+        return generate_ai_blog(keyword, current_season)
+    elif keyword_category == "건강":
+        return generate_health_blog(keyword, current_season)
+    elif keyword_category == "재테크":
+        return generate_finance_blog(keyword, current_season)
+    elif keyword_category == "여행":
+        return generate_travel_blog(keyword, current_season)
+    elif keyword_category == "육아교육":
+        return generate_education_blog(keyword, current_season)
+    elif keyword_category == "라이프스타일":
+        return generate_lifestyle_blog(keyword, current_season)
+    else:
+        return generate_trend_blog(keyword, current_season)
     
     # 키워드별 자연스러운 도입부 패턴
     KEYWORD_INTROS = {
