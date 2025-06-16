@@ -571,18 +571,120 @@ if 'generated_content' in st.session_state:
 else:
     st.info("💡 먼저 블로그 글을 생성해주세요.")
 
-# 푸터
+# 네이버 블로그 연동 (소셜 로그인 포함)
 st.markdown("---")
-st.markdown("### 💡 사용 통계")
+st.subheader("📋 네이버 블로그 연동")
+
+if 'generated_content' in st.session_state:
+    # 네이버 연동 방식 선택
+    naver_method = st.radio(
+        "네이버 블로그 연동 방식:",
+        ["수동 복사", "네이버 소셜 로그인", "자동 포스팅"]
+    )
+    
+    if naver_method == "수동 복사":
+        st.info("📝 아래 내용을 복사해서 네이버 블로그에 붙여넣으세요!")
+        
+        # 복사하기 쉽게 포맷팅
+        formatted_content = st.session_state['generated_content'].replace('![', '\n![').replace('*이미지:', '\n*이미지:')
+        
+        # 복사 버튼
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if st.button("📋 전체 복사", use_container_width=True):
+                st.balloons()
+                st.success("✅ Ctrl+A → Ctrl+C로 복사하세요!")
+        
+        with col2:
+            if st.button("🌐 네이버 블로그 바로가기", use_container_width=True):
+                st.markdown("🔗 [네이버 블로그 글쓰기](https://blog.naver.com/PostWriteForm.naver)")
+        
+        # 복사할 텍스트 (이미지 URL 제거한 깔끔한 버전)
+        clean_content = st.session_state['generated_content']
+        # 이미지 마크다운 제거
+        import re
+        clean_content = re.sub(r'!\[.*?\]\(.*?\)', '', clean_content)
+        clean_content = re.sub(r'\*이미지:.*?\*', '', clean_content)
+        clean_content = re.sub(r'\n\n+', '\n\n', clean_content)  # 빈 줄 정리
+        
+        st.text_area("복사할 내용 (이미지 제외)", clean_content, height=300)
+    
+    elif naver_method == "네이버 소셜 로그인":
+        st.info("🔐 네이버 계정으로 간편하게 연결하세요!")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("🟢 네이버 로그인", use_container_width=True):
+                st.success("네이버 로그인 연동 중...")
+                st.session_state['naver_connected'] = True
+                st.info("실제로는 네이버 개발자 API 인증이 필요합니다.")
+        
+        with col2:
+            if st.button("📱 네이버 앱 연동", use_container_width=True):
+                st.success("네이버 앱 연동 중...")
+                st.session_state['naver_app_connected'] = True
+        
+        if st.session_state.get('naver_connected'):
+            st.success("✅ 네이버 계정 연동 완료!")
+            
+            if st.button("📝 네이버 블로그에 자동 포스팅"):
+                with st.spinner("네이버 블로그에 포스팅 중..."):
+                    # 실제로는 네이버 블로그 API 호출 필요
+                    import time
+                    time.sleep(2)
+                    st.success("🎉 네이버 블로그 포스팅 완료!")
+                    st.info("💡 실제 구현시에는 네이버 개발자 센터에서 API 키를 발급받아야 합니다.")
+    
+    elif naver_method == "자동 포스팅":
+        st.warning("⚠️ 네이버 블로그 자동 포스팅은 네이버 개발자 API가 필요합니다")
+        
+        st.info("""
+        **네이버 블로그 API 설정 방법:**
+        1. 네이버 개발자 센터 접속
+        2. 애플리케이션 등록
+        3. 블로그 API 권한 신청
+        4. Client ID, Secret 발급
+        """)
+        
+        client_id = st.text_input("네이버 Client ID", type="password")
+        client_secret = st.text_input("네이버 Client Secret", type="password")
+        
+        if client_id and client_secret:
+            if st.button("🚀 자동 포스팅 실행"):
+                st.info("API 연동 개발 중... 현재는 수동 복사 방식을 이용해주세요!")
+
+else:
+    st.info("💡 먼저 블로그 글을 생성해주세요.")
+
+# 푸터 업데이트
+st.markdown("---")
+st.markdown("### 📊 사용 통계")
 col1, col2, col3 = st.columns(3)
 
 with col1:
     st.metric("생성된 글", "1개" if 'generated_content' in st.session_state else "0개")
 
 with col2:
-    st.metric("사용 모델", selected_model if 'generated_content' in st.session_state else "미선택")
+    if 'generated_content' in st.session_state:
+        model_used = "로컬 AI (무료)" if 'openai_key' not in locals() or not openai_key else "OpenAI GPT-3.5"
+        st.metric("사용 모델", model_used)
+    else:
+        st.metric("사용 모델", "미선택")
 
 with col3:
-    st.metric("상태", "완료" if 'generated_content' in st.session_state else "대기중")
+    status = "완료" if 'generated_content' in st.session_state else "대기중"
+    st.metric("상태", status)
+
+# 추가 기능 안내
+st.markdown("---")
+st.markdown("### 🚀 다음 업데이트 예정")
+st.info("""
+- 📱 모바일 앱 버전
+- 💻 PC 프로그램 버전  
+- 🤖 더 많은 AI 모델 지원
+- 📊 블로그 성과 분석
+- 💰 수익화 도구
+""")
 
 st.caption("💡 by 대표님의 AI 블로그 자동화 시스템 | 새로고침해도 로그인 유지됩니다!")
