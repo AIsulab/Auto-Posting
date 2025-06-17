@@ -194,21 +194,24 @@ if 'login_ok' not in st.session_state:
 # 로그인 체크
 if not st.session_state.get('login_ok', False):
     
-    # 전체를 하나의 컨테이너로 만들어서 간격 완전 제거
+    # 헤더 (박스 없이)
+    st.markdown("""
+    <div style="text-align: center; margin: 2rem 0 1.5rem 0;">
+        <h1 style="font-size: 3rem; margin-bottom: 0.5rem; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🚀 AI 블로그 자동화 Pro</h1>
+        <p style="font-size: 1.2rem; color: #666; margin: 0;">진수 대표님 전용 시스템</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 로그인 폼 (박스 없이, 깔끔하게)
     col1, col2, col3 = st.columns([1, 1, 1])
     
     with col2:
-        st.markdown("""
-        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #e1e5e9; margin-top: 2rem; text-align: center;">
-            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🚀 AI 블로그 자동화 Pro</h1>
-            <p style="font-size: 1.1rem; color: #666; margin-bottom: 1.5rem;">진수 대표님 전용 시스템</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 1.5rem 0;">
-        """, unsafe_allow_html=True)
-        
         st.markdown("#### 🔑 로그인")
         
         user_id = st.text_input("아이디", value="aisulab", label_visibility="collapsed", placeholder="아이디를 입력하세요")
         user_pw = st.text_input("비밀번호", value="!js44358574", type="password", label_visibility="collapsed", placeholder="비밀번호를 입력하세요")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
         
         if st.button("🔑 로그인", use_container_width=True, key="login_btn"):
             if user_id == VALID_ID and user_pw == VALID_PW:
@@ -218,8 +221,6 @@ if not st.session_state.get('login_ok', False):
                 st.rerun()
             else:
                 st.error("❌ 아이디/비밀번호가 틀렸습니다.")
-        
-        st.markdown("</div>", unsafe_allow_html=True)
     
     st.stop()
 
