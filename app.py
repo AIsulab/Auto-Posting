@@ -249,24 +249,130 @@ with col3:
         st.session_state['login_ok'] = False
         st.rerun()
 
-# 상태 표시 (카드 형태)
-col1, col2 = st.columns(2)
+# 상태 표시 (카드 형태) - 기존 코드 아래에 추가
+
+# 주요 기능 소개 섹션
+st.markdown("<br>", unsafe_allow_html=True)
+
+# 기능 소개 헤더
+st.markdown("""
+<div style="text-align: center; margin: 3rem 0 2rem 0;">
+    <h2 style="color: #333;">🚀 주요 기능</h2>
+    <p style="color: #666; font-size: 1.1rem;">AI 블로그 자동화 Pro의 강력한 기능들을 확인해보세요</p>
+</div>
+""", unsafe_allow_html=True)
+
+# 기능 카드들 (3열)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     st.markdown("""
-    <div class="feature-card">
-        <h4>✅ 시스템 상태</h4>
-        <p style="color: #28a745; font-weight: bold;">정상 작동 중</p>
+    <div class="feature-card hover-effect">
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
+            <h4 style="color: #667eea; margin-bottom: 1rem;">AI 글 생성</h4>
+            <p style="color: #666; line-height: 1.6;">
+                • 7개 카테고리 전문 글<br>
+                • 키워드별 맞춤 내용<br>
+                • SEO 최적화 자동 적용<br>
+                • 이미지 자동 삽입
+            </p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
-    <div class="feature-card">
-        <h4>🔄 다음 단계</h4>
-        <p style="color: #667eea; font-weight: bold;">블로그 생성 엔진 추가 예정</p>
+    <div class="feature-card hover-effect">
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">💰</div>
+            <h4 style="color: #28a745; margin-bottom: 1rem;">수익화 최적화</h4>
+            <p style="color: #666; line-height: 1.6;">
+                • Google Ads 자동 삽입<br>
+                • 구독 CTA 버튼 생성<br>
+                • 체류시간 증가 최적화<br>
+                • 상품 추천 섹션
+            </p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div class="feature-card hover-effect">
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
+            <h4 style="color: #dc3545; margin-bottom: 1rem;">자동 게시</h4>
+            <p style="color: #666; line-height: 1.6;">
+                • 워드프레스 자동 업로드<br>
+                • 네이버 블로그 연동<br>
+                • 예약 게시 기능<br>
+                • 다중 플랫폼 지원
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 통계 섹션
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="text-align: center; margin: 2rem 0;">
+    <h3 style="color: #333;">📊 실시간 통계</h3>
+</div>
+""", unsafe_allow_html=True)
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.markdown("""
+    <div class="stat-card">
+        <h2 style="margin: 0; font-size: 2.5rem;">8,000+</h2>
+        <p style="margin: 0.5rem 0 0 0;">가능한 글 조합</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="stat-card">
+        <h2 style="margin: 0; font-size: 2.5rem;">7</h2>
+        <p style="margin: 0.5rem 0 0 0;">전문 카테고리</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div class="stat-card">
+        <h2 style="margin: 0; font-size: 2.5rem;">100%</h2>
+        <p style="margin: 0.5rem 0 0 0;">자동화 시스템</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    st.markdown("""
+    <div class="stat-card">
+        <h2 style="margin: 0; font-size: 2.5rem;">24/7</h2>
+        <p style="margin: 0.5rem 0 0 0;">무제한 이용</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 시작하기 버튼
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if st.button("🚀 블로그 생성 시작하기", use_container_width=True, key="start_btn"):
+        st.balloons()
+        st.success("🎉 곧 블로그 생성 기능이 추가됩니다!")
+
+# 푸터
+st.markdown("""
+<div style="text-align: center; margin-top: 4rem; padding: 2rem; background-color: #f8f9fa; border-radius: 15px;">
+    <p style="color: #666; margin: 0;">
+        🏆 by AI SULAB | 진수 대표님 전용 시스템 | 새로고침해도 로그인 유지 ⭐
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 # =============================================================================
 # 핵심 함수들 정의
