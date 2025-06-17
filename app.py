@@ -202,12 +202,14 @@ if not st.session_state.get('login_ok', False):
     </div>
     """, unsafe_allow_html=True)
     
-    # 로그인 폼 - 중앙 정렬
+    # 로그인 폼 - 중앙 정렬 (간격 제거)
+    st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+
     col1, col2, col3 = st.columns([1, 1, 1])
-    
+
     with col2:
         st.markdown("""
-        <div class="login-container">
+        <div class="login-container" style="margin-top: 0;">
         """, unsafe_allow_html=True)
         
         st.markdown("#### 🔑 로그인")
