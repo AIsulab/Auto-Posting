@@ -196,9 +196,9 @@ if not st.session_state.get('login_ok', False):
     
     # 헤더 영역
     st.markdown("""
-    <div style="text-align: center; margin-bottom: 3rem;">
-        <h1 style="font-size: 3rem; margin-bottom: 0.5rem;">🚀 AI 블로그 자동화 Pro</h1>
-        <p style="font-size: 1.2rem; color: #666; margin: 0;">진수 대표님 전용 시스템</p>
+    <div style="text-align: center; margin: 1rem 0 1rem 0;">
+    <h1 style="font-size: 3rem; margin-bottom: 0.5rem;">🚀 AI 블로그 자동화 Pro</h1>
+    <p style="font-size: 1.2rem; color: #666; margin: 0 0 1rem 0;">진수 대표님 전용 시스템</p>
     </div>
     """, unsafe_allow_html=True)
     
