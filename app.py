@@ -193,15 +193,31 @@ if 'login_ok' not in st.session_state:
 
 # 로그인 체크
 if not st.session_state.get('login_ok', False):
-    st.title("🚀 AI 블로그 자동화 Pro")
-    st.markdown("### 진수 대표님 전용 시스템")
     
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # 헤더 영역
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="font-size: 3rem; margin-bottom: 0.5rem;">🚀 AI 블로그 자동화 Pro</h1>
+        <p style="font-size: 1.2rem; color: #666; margin: 0;">진수 대표님 전용 시스템</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 로그인 폼 - 중앙 정렬
+    col1, col2, col3 = st.columns([1, 1, 1])
+    
     with col2:
-        user_id = st.text_input("아이디", value="aisulab")
-        user_pw = st.text_input("비밀번호", value="!js44358574", type="password")
+        st.markdown("""
+        <div class="login-container">
+        """, unsafe_allow_html=True)
         
-        if st.button("🔑 로그인", use_container_width=True):
+        st.markdown("#### 🔑 로그인")
+        
+        user_id = st.text_input("아이디", value="aisulab", label_visibility="collapsed", placeholder="아이디를 입력하세요")
+        user_pw = st.text_input("비밀번호", value="!js44358574", type="password", label_visibility="collapsed", placeholder="비밀번호를 입력하세요")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("🔑 로그인", use_container_width=True, key="login_btn"):
             if user_id == VALID_ID and user_pw == VALID_PW:
                 st.session_state['login_ok'] = True
                 st.success("✅ 로그인 성공!")
@@ -209,6 +225,9 @@ if not st.session_state.get('login_ok', False):
                 st.rerun()
             else:
                 st.error("❌ 아이디/비밀번호가 틀렸습니다.")
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+    
     st.stop()
 
 # 메인 화면
