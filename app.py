@@ -230,14 +230,43 @@ if not st.session_state.get('login_ok', False):
     
     st.stop()
 
-# 메인 화면
-st.title("🚀 AI 블로그 자동화 Pro")
-st.markdown("### 💰 수익화 최적화 + 📈 SEO 자동화 + 🔄 자동 게시")
+# 메인 화면 헤더 (고정)
+st.markdown("""
+<div class="main-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="margin: 0; font-size: 2rem;">🚀 AI 블로그 자동화 Pro</h1>
+            <p style="margin: 0; color: #666;">💰 수익화 최적화 + 📈 SEO 자동화 + 🔄 자동 게시</p>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-# 로그아웃 버튼
-if st.button("🚪 로그아웃"):
-    st.session_state['login_ok'] = False
-    st.rerun()
+# 로그아웃 버튼 (우상단)
+col1, col2, col3 = st.columns([3, 1, 1])
+with col3:
+    if st.button("🚪 로그아웃", key="logout_btn"):
+        st.session_state['login_ok'] = False
+        st.rerun()
+
+# 상태 표시 (카드 형태)
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("""
+    <div class="feature-card">
+        <h4>✅ 시스템 상태</h4>
+        <p style="color: #28a745; font-weight: bold;">정상 작동 중</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="feature-card">
+        <h4>🔄 다음 단계</h4>
+        <p style="color: #667eea; font-weight: bold;">블로그 생성 엔진 추가 예정</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # =============================================================================
 # 핵심 함수들 정의
