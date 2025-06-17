@@ -6,6 +6,21 @@ import random
 import urllib.parse
 import webbrowser
 
+# Streamlit 페이지 설정
+st.set_page_config(
+    page_title="AI 블로그 자동화",
+    page_icon="📝",
+    layout="wide"
+)
+
+# 세션 상태 초기화
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
+if 'selected_model' not in st.session_state:
+    st.session_state['selected_model'] = "로컬 AI (무료)"
+if 'openai_key' not in st.session_state:
+    st.session_state['openai_key'] = ""
+
 # 전문가별 인사말과 전문성 표현
 greetings = {
     "건강_의사": "안녕하세요, 가정의학과 전문의입니다.",
@@ -1044,7 +1059,7 @@ def generate_local_blog(keyword, hook_style):
     # AI SULAB 고정 블로그 글 생성
     blog_content = f"""# {keyword} 완벽 가이드 - AI SULAB이 전해드리는 검증된 정보
 
-안녕하세요! AI SULAB입니다. 오늘은 {keyword}에 대한 정보를 공유해드리려고 해요.
+안녕하세요! AI SULAB입니다. 오늘은 {keyword}에 대한 정보를 공유해드릴게요.
 
 {start_style}
 
@@ -1227,150 +1242,33 @@ def handle_oauth_callback():
     
     return False
 
-# 페이지 설정 (맨 처음에)
-st.set_page_config(page_title="AI 블로그 자동화", layout="centered")
-
-# 무료 이미지 API 설정
-UNSPLASH_API_KEY = "demo"  # 무료 사용
-PIXABAY_API_KEY = "demo"   # 무료 사용
-
-# 무료 이미지 검색 함수
-def get_free_images(keyword, count=3):
-    """키워드별 실시간 이미지 검색 및 생성"""
+# 무료 AI API 호출 함수
+def call_huggingface_api(model_name, prompt):
+    """Hugging Face 무료 API 호출"""
+    api_url = f"https://api-inference.huggingface.co/models/{model_name}"
     
-    # 키워드 → 영어 번역 매핑
-    keyword_translation = {
-        "AI": "artificial intelligence technology",
-        "인공지능": "artificial intelligence",
-        "챗GPT": "chatbot technology",
-        "로봇": "robot technology",
-        "자동화": "automation technology",
-        "건강": "health wellness",
-        "다이어트": "diet healthy food",
-        "운동": "exercise fitness",
-        "혈압": "blood pressure health",
-        "투자": "investment finance",
-        "주식": "stock market",
-        "부동산": "real estate",
-        "여행": "travel vacation",
-        "제주도": "jeju island korea",
-        "육아": "parenting children",
-        "요리": "cooking food",
-        "패션": "fashion style",
-        "뷰티": "beauty skincare"
+    headers = {}  # 무료 사용
+    payload = {
+        "inputs": prompt[:500],  # 프롬프트 길이 제한
+        "parameters": {
+            "max_new_tokens": 200,
+            "temperature": 0.7,
+            "return_full_text": False
+        }
     }
-    
-    # 키워드에 맞는 영어 검색어 선택
-    search_term = keyword_translation.get(keyword, keyword)
     
     try:
-        # Unsplash API 호출 (무료 버전)
-        api_url = f"https://api.unsplash.com/search/photos"
-        params = {
-            "query": search_term,
-            "per_page": count * 2,  # 여유분 확보
-            "orientation": "landscape",
-            "order_by": "relevant"
-        }
-        
-        headers = {
-            "Authorization": "Client-ID demo_access_key"  # 실제로는 API 키 필요
-        }
-        
-        # 실제 API 호출 대신 시뮬레이션
-        # response = requests.get(api_url, headers=headers, params=params, timeout=10)
-        
-        # 시뮬레이션: 키워드별 다양한 이미지 풀에서 랜덤 선택
-        simulated_images = generate_keyword_images(keyword, search_term, count)
-        
-        return simulated_images
-        
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        if response.status_code == 200:
+            result = response.json()
+            if isinstance(result, list) and len(result) > 0:
+                return result[0].get('generated_text', '생성 실패')
+            return str(result)
+        else:
+            return f"API 오류: {response.status_code} - 잠시 후 다시 시도해주세요"
     except Exception as e:
-        # API 오류시 기본 이미지 사용
-        print(f"이미지 검색 오류: {e}")
-        return get_fallback_images(keyword, count)
-
-def generate_keyword_images(keyword, search_term, count):
-    """키워드별 시뮬레이션 이미지 생성"""
+        return f"네트워크 오류: {str(e)}"
     
-    # 키워드별 특화 이미지 ID 풀 (Unsplash 실제 이미지 ID)
-    image_pools = {
-        "artificial intelligence technology": [
-            "photo-1677442136019-21780ecad995", "photo-1485827404703-89b55fcc595e",
-            "photo-1518709268805-4e9042af2176", "photo-1507003211169-0a1dd7228f2d",
-            "photo-1551288049-bebda4e38f71", "photo-1555255707-c07966088b7b",
-            "photo-1504639725590-34d0984388bd", "photo-1581091226825-a6a2a5aee158"
-        ],
-        "health wellness": [
-            "photo-1571019613454-1cb2f99b2d8b", "photo-1506126613408-eca07ce68773",
-            "photo-1559757175-0eb30cd8c063", "photo-1505576399279-565b52d4ac71",
-            "photo-1544367567-0f2fcb009e0b", "photo-1559757148-5c350d0d3c56",
-            "photo-1576671081837-49000212a370", "photo-1540420773420-3366772f4999"
-        ],
-        "diet healthy food": [
-            "photo-1490645935967-10de6ba17061", "photo-1551782450-a2132b4ba21d",
-            "photo-1512621776951-a57141f2eefd", "photo-1498837167922-ddd27525d352",
-            "photo-1567620905732-2d1ec7ab7445", "photo-1546069901-ba9599a7e63c",
-            "photo-1482049016688-2d3e1b311543", "photo-1540420773420-3366772f4999"
-        ],
-        "investment finance": [
-            "photo-1611974789855-9c2a0a7236a3", "photo-1460925895917-afdab827c52f",
-            "photo-1554224155-6726b3ff858f", "photo-1590283603385-17ffb3a7f29f",
-            "photo-1579621970563-ebec7560ff3e", "photo-1579621970588-a35d0e7ab9b6",
-            "photo-1579621970563-ebec7560ff3e", "photo-1560472354-b33ff0c44a43"
-        ],
-        "travel vacation": [
-            "photo-1488646953014-85cb44e25828", "photo-1507525428034-b723cf961d3e",
-            "photo-1469474968028-56623f02e42e", "photo-1506905925346-21bda4d32df4",
-            "photo-1436491865332-7a61a109cc05", "photo-1504150558240-0b4fd8946624",
-            "photo-1502780402662-acc01917949e", "photo-1506905925346-21bda4d32df4"
-        ]
-    }
-    
-    # 기본 이미지 풀
-    default_pool = [
-        "photo-1559757148-5c350d0d3c56", "photo-1576671081837-49000212a370",
-        "photo-1505576399279-565b52d4ac71", "photo-1544367567-0f2fcb009e0b",
-        "photo-1506126613408-eca07ce68773", "photo-1571019613454-1cb2f99b2d8b"
-    ]
-    
-    # 검색어에 맞는 이미지 풀 선택
-    selected_pool = image_pools.get(search_term, default_pool)
-    
-    # 랜덤하게 이미지 선택
-    selected_ids = random.sample(selected_pool, min(count, len(selected_pool)))
-    
-    # 이미지 URL 생성
-    images = []
-    for i, img_id in enumerate(selected_ids):
-        # 랜덤 크기 조정으로 매번 다른 이미지
-        width = random.choice([600, 650, 700])
-        height = random.choice([400, 450, 500])
-        
-        images.append({
-            "url": f"https://images.unsplash.com/{img_id}?w={width}&h={height}&fit=crop&auto=format",
-            "alt": f"{keyword} 관련 {['핵심', '활용', '마무리'][i]} 이미지"
-        })
-    
-    return images
-
-def get_fallback_images(keyword, count):
-    """API 오류시 대체 이미지"""
-    fallback_urls = [
-        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1576671081837-49000212a370?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=600&h=400&fit=crop"
-    ]
-    
-    images = []
-    for i in range(count):
-        images.append({
-            "url": fallback_urls[i % len(fallback_urls)],
-            "alt": f"{keyword} 관련 기본 이미지"
-        })
-    
-    return images
-
 # 로그인 정보를 URL 파라미터로 유지
 if 'logged_in' not in st.query_params:
     if 'login_ok' not in st.session_state:
@@ -1396,15 +1294,7 @@ BLOGGER_PERSONAS = {
     "물리치료사_조현우": {"age": 34, "job": "재활병원 물리치료사", "location": "청주 흥덕구", "experience": "9년차"},
     "피트니스코치_안서연": {"age": 27, "job": "크로스핏 코치", "location": "포항 북구", "experience": "4년차"},
     "영양상담사_송지훈": {"age": 30, "job": "보건소 영양사", "location": "천안 동남구", "experience": "7년차"},
-    "재활트레이너_홍예진": {"age": 33, "job": "스포츠 재활 전문가", "location": "창원 의창구", "experience": "11년차"},
-    "건강관리사_류민호": {"age": 39, "job": "직장 보건관리자", "location": "고양 일산서구", "experience": "13년차"},
-    "다이어트코치_윤하늘": {"age": 25, "job": "온라인 다이어트 코치", "location": "성남 분당구", "experience": "2년차"},
-    "헬스케어매니저_임도현": {"age": 36, "job": "웰니스센터 매니저", "location": "제주 제주시", "experience": "10년차"},
-    "운동처방사_노승아": {"age": 42, "job": "운동처방 전문의", "location": "춘천 춘천시", "experience": "16년차"},
-    "식이상담사_강보람": {"age": 28, "job": "임상영양사", "location": "원주 원주시", "experience": "5년차"},
-    "주부블로거_문지영": {"age": 37, "job": "육아맘 (前 체육교사)", "location": "안산 단원구", "experience": "12년"},
-    "스포츠강사_황석진": {"age": 29, "job": "수영 강사", "location": "목포 목포시", "experience": "6년차"},
-    "웰니스코치_서예린": {"age": 40, "job": "기업 웰니스 컨설턴트", "location": "경주 경주시", "experience": "14년차"}
+    "재활트레이너_홍예진": {"age": 33, "job": "스포츠 재활 전문가", "location": "창원 의창구", "experience": "8년차"}
 }
 
 # 키워드별 전문 페르소나 매칭
@@ -1528,598 +1418,341 @@ def get_current_season():
     else:
         return "겨울"
 
-# 무료 AI API 호출 함수
-def call_huggingface_api(model_name, prompt):
-    """Hugging Face 무료 API 호출"""
-    api_url = f"https://api-inference.huggingface.co/models/{model_name}"
+# 무료 이미지 검색 함수
+def get_free_images(keyword, count=3):
+    """무료 이미지 URL 가져오기"""
+    images = []
     
-    headers = {}  # 무료 사용
-    payload = {
-        "inputs": prompt[:500],  # 프롬프트 길이 제한
-        "parameters": {
-            "max_new_tokens": 200,
-            "temperature": 0.7,
-            "return_full_text": False
+    try:
+        # 키워드를 영어로 변환 (간단한 매핑)
+        keyword_en = {
+            "혈압": "blood pressure",
+            "음식": "food",
+            "건강": "health",
+            "다이어트": "diet",
+            "운동": "exercise",
+            "영양": "nutrition"
+        }.get(keyword.split()[0], keyword)
+        
+        # Lorem Picsum 사용 (완전 무료)
+        for i in range(count):
+            width = random.choice([800, 600, 700])
+            height = random.choice([400, 300, 350])
+            seed = random.randint(1, 1000)
+            img_url = f"https://picsum.photos/{width}/{height}?random={seed}"
+            images.append({
+                "url": img_url,
+                "alt": f"{keyword} 관련 이미지 {i+1}"
+            })
+    except Exception as e:
+        # 기본 이미지
+        images = [{
+            "url": "https://picsum.photos/600/300?random=1",
+            "alt": f"{keyword} 관련 이미지"
+        } for _ in range(count)]
+    
+    return images
+
+# 로그인 정보를 URL 파라미터로 유지
+if 'logged_in' not in st.query_params:
+    if 'login_ok' not in st.session_state:
+        st.session_state['login_ok'] = False
+
+VALID_ID = "aisulab"
+VALID_PW = "!js44358574"
+
+# 고품질 블로거 페르소나 시스템
+import random
+from datetime import datetime, timedelta
+
+# 다양한 블로거 페르소나 정의 (20가지)
+BLOGGER_PERSONAS = {
+    "건강관리사_김민지": {"age": 32, "job": "병원 영양사", "location": "서울 강남구", "experience": "7년차"},
+    "헬스트레이너_박준호": {"age": 28, "job": "개인 PT 트레이너", "location": "부산 해운대구", "experience": "5년차"},
+    "약사_이수현": {"age": 35, "job": "동네 약국 약사", "location": "대구 수성구", "experience": "10년차"},
+    "주부_최은영": {"age": 41, "job": "전업주부 (前 간호사)", "location": "인천 연수구", "experience": "15년"},
+    "운동강사_이민수": {"age": 26, "job": "필라테스 강사", "location": "광주 서구", "experience": "3년차"},
+    "한의사_박소영": {"age": 38, "job": "한방병원 원장", "location": "전주 완산구", "experience": "12년차"},
+    "간호사_김태현": {"age": 29, "job": "대학병원 간호사", "location": "울산 남구", "experience": "6년차"},
+    "요가강사_정미래": {"age": 31, "job": "요가스튜디오 대표", "location": "수원 영통구", "experience": "8년차"},
+    "물리치료사_조현우": {"age": 34, "job": "재활병원 물리치료사", "location": "청주 흥덕구", "experience": "9년차"},
+    "피트니스코치_안서연": {"age": 27, "job": "크로스핏 코치", "location": "포항 북구", "experience": "4년차"},
+    "영양상담사_송지훈": {"age": 30, "job": "보건소 영양사", "location": "천안 동남구", "experience": "7년차"},
+    "재활트레이너_홍예진": {"age": 33, "job": "스포츠 재활 전문가", "location": "창원 의창구", "experience": "8년차"}
+}
+
+# 키워드별 전문 페르소나 매칭
+KEYWORD_PERSONA_MAPPING = {
+    "건강": ["건강관리사_김민지", "약사_이수현", "간호사_김태현", "주부_최은영"],
+    "운동": ["헬스트레이너_박준호", "운동강사_이민수", "피트니스코치_안서연"],
+    "다이어트": ["헬스트레이너_박준호", "영양상담사_송지훈", "다이어트코치_윤하늘"],
+    "재테크": ["주부블로거_문지영", "웰니스코치_서예린"],
+    "여행": ["주부블로거_문지영", "웰니스코치_서예린"],
+    "육아": ["주부_최은영", "주부블로거_문지영"],
+    "라이프스타일": ["요가강사_정미래", "웰니스코치_서예린"]
+}
+
+def get_smart_persona(keyword):
+    """키워드에 맞는 스마트한 페르소나 생성"""
+    personas = {
+        "건강_의사": {
+            "job": "가정의학과 전문의",
+            "experience": "15년",
+            "specialty": "만성질환 관리",
+            "tone": "전문적이면서도 친근한"
+        },
+        "운동_트레이너": {
+            "job": "퍼스널 트레이너",
+            "experience": "10년",
+            "specialty": "체중 관리, 근력 운동",
+            "tone": "열정적이고 동기부여하는"
+        },
+        "요리_셰프": {
+            "job": "전문 요리사",
+            "experience": "12년",
+            "specialty": "건강식, 한식 퓨전",
+            "tone": "실용적이고 창의적인"
+        },
+        "공부_교사": {
+            "job": "진로상담 교사",
+            "experience": "8년",
+            "specialty": "학습법, 시간관리",
+            "tone": "조언자적이고 체계적인"
+        },
+        "직장_멘토": {
+            "job": "커리어 코치",
+            "experience": "20년",
+            "specialty": "직무 역량 개발",
+            "tone": "통찰력 있고 실천적인"
         }
     }
     
+    # 키워드에 따른 페르소나 선택
+    if "건강" in keyword or "질병" in keyword or "다이어트" in keyword:
+        persona_name = "건강_의사"
+    elif "운동" in keyword or "체중" in keyword or "근육" in keyword:
+        persona_name = "운동_트레이너"
+    elif "요리" in keyword or "음식" in keyword or "레시피" in keyword:
+        persona_name = "요리_셰프"
+    elif "공부" in keyword or "학습" in keyword or "시험" in keyword:
+        persona_name = "공부_교사"
+    else:
+        persona_name = "직장_멘토"
+    
+    return persona_name, personas[persona_name]
+
+def generate_personal_experience(keyword, persona, persona_name):
+    """페르소나의 특성을 반영한 개인적 경험담 생성"""
+    experiences = {
+        "건강_의사": [
+            f"제가 {persona['experience']}동안 {persona['specialty']} 분야에서 수많은 환자들을 진료하면서 발견한 {keyword}에 대한 놀라운 사실이 있습니다.",
+            f"진료실에서 만난 환자들 중 {keyword} 때문에 고민하시는 분들이 정말 많았어요. 그래서 제가 특별히 연구하고 정리한 내용을 공유하려고 합니다.",
+            f"{persona['specialty']} 전문의로서, {keyword}에 대한 오해와 진실을 명확하게 알려드리고 싶습니다."
+        ],
+        "운동_트레이너": [
+            f"{persona['experience']}간의 트레이닝 경험에서 찾아낸 {keyword}의 핵심 포인트를 알려드립니다.",
+            f"제 회원님들 중 {keyword}로 고민하시는 분들을 위해 특별히 개발한 프로그램이 있습니다.",
+            f"저도 처음에는 {keyword}에 대해 잘못 알고 있었어요. 그런데 수많은 시행착오 끝에 발견한 진짜 해결책이 있습니다."
+        ],
+        "요리_셰프": [
+            f"주방에서 {persona['experience']}동안 연구한 {keyword} 비법을 처음으로 공개합니다.",
+            f"{persona['specialty']} 전문가로서 {keyword}에 대한 특별한 노하우를 알려드리려고 해요.",
+            f"많은 분들이 {keyword}를 어려워하시는데, 제가 쉽게 알려드리겠습니다."
+        ],
+        "공부_교사": [
+            f"{persona['experience']}동안 수많은 학생들의 {keyword} 고민을 해결해주면서 깨달은 점이 있습니다.",
+            f"진로상담 교사로서 {keyword}에 대한 학생들의 고민을 해결해주면서 발견한 핵심 원리가 있어요.",
+            f"{keyword}! 선생님인 저도 처음에는 막막했답니다. 그래서 준비했어요."
+        ],
+        "직장_멘토": [
+            f"20년 넘게 수많은 직장인들의 {keyword} 고민을 상담하면서 발견한 공통점이 있습니다.",
+            f"저도 처음 직장생활 할 때는 {keyword} 때문에 정말 힘들었어요. 그때의 경험을 바탕으로 해결책을 찾았습니다.",
+            f"수많은 기업에서 강의하면서 모은 {keyword}에 대한 노하우를 공유합니다."
+        ]
+    }
+    
+    return random.choice(experiences[persona_name])
+
+# 전문가별 인사말과 전문성 표현
+greetings = {
+    "건강_의사": "안녕하세요, 가정의학과 전문의입니다.",
+    "운동_트레이너": "안녕하세요, 현직 퍼스널 트레이너입니다.",
+    "요리_셰프": "안녕하세요, 건강식 전문 요리사입니다.",
+    "공부_교사": "안녕하세요, 진로상담 전문 교사입니다.",
+    "직장_멘토": "안녕하세요, 커리어 코치입니다."
+}
+
+expertise = {
+    "건강_의사": "의학적 근거를 바탕으로",
+    "운동_트레이너": "과학적인 운동 원리를 기반으로",
+    "요리_셰프": "전문 요리사의 노하우로",
+    "공부_교사": "교육 전문가의 관점에서",
+    "직장_멘토": "풍부한 실무 경험을 바탕으로"
+}
+
+def get_current_season():
+    """현재 계절 반환"""
+    month = time.localtime().tm_mon
+    if 3 <= month <= 5:
+        return "봄"
+    elif 6 <= month <= 8:
+        return "여름"
+    elif 9 <= month <= 11:
+        return "가을"
+    else:
+        return "겨울"
+
+# 무료 이미지 검색 함수
+def get_free_images(keyword, count=3):
+    """무료 이미지 URL 가져오기"""
+    images = []
+    
     try:
-        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
-        if response.status_code == 200:
-            result = response.json()
-            if isinstance(result, list) and len(result) > 0:
-                return result[0].get('generated_text', '생성 실패')
-            return str(result)
-        else:
-            return f"API 오류: {response.status_code} - 잠시 후 다시 시도해주세요"
+        # 키워드를 영어로 변환 (간단한 매핑)
+        keyword_en = {
+            "혈압": "blood pressure",
+            "음식": "food",
+            "건강": "health",
+            "다이어트": "diet",
+            "운동": "exercise",
+            "영양": "nutrition"
+        }.get(keyword.split()[0], keyword)
+        
+        # Lorem Picsum 사용 (완전 무료)
+        for i in range(count):
+            width = random.choice([800, 600, 700])
+            height = random.choice([400, 300, 350])
+            seed = random.randint(1, 1000)
+            img_url = f"https://picsum.photos/{width}/{height}?random={seed}"
+            images.append({
+                "url": img_url,
+                "alt": f"{keyword} 관련 이미지 {i+1}"
+            })
     except Exception as e:
-        return f"네트워크 오류: {str(e)}"
+        # 기본 이미지
+        images = [{
+            "url": "https://picsum.photos/600/300?random=1",
+            "alt": f"{keyword} 관련 이미지"
+        } for _ in range(count)]
     
-# 최종 생성 버튼
-st.markdown("---")
-if st.button("✨ 고품질 개인 블로그 글 생성", type="primary", use_container_width=True, key="generate_blog"):
-    if not keyword:
-        st.warning("⚠️ 키워드를 입력해주세요!")
-    else:
-        with st.spinner("AI가 매력적인 블로그 글을 작성 중입니다... 📝"):
-            ai_content = None
-            
-            if selected_model == "OpenAI GPT-3.5":
-                if not openai_key:
-                    st.error("❌ OpenAI API 키를 입력해주세요!")
-                else:
-                    # OpenAI API 호출
-                    prompt = f"""
-당신은 블로그 콘텐츠 전문가입니다. {keyword} 주제로 독자가 끝까지 읽을 수밖에 없는 매력적이고 풍부한 블로그 글을 작성해주세요.
+    return images
 
-다음 요소들을 반드시 포함해주세요:
+# 로그인 정보를 URL 파라미터로 유지
+if 'logged_in' not in st.query_params:
+    if 'login_ok' not in st.session_state:
+        st.session_state['login_ok'] = False
 
-🎯 구조:
-- 강력한 제목 (이모지 포함)
-- 후킹이 강한 도입부
-- 읽으면 얻을 수 있는 것들 (체크리스트)
-- 5개 핵심 포인트 (번호 매기기)
-- 실전 적용 가이드
-- FAQ 섹션
-- 감정적 마무리 + CTA
+VALID_ID = "aisulab"
+VALID_PW = "!js44358574"
 
-💡 스타일:
-- 이모지 적극 활용
-- 대화체 톤
-- 구체적인 예시와 수치
-- 독자 참여 유도 문장
-- 중간중간 질문 던지기
+# 고품질 블로거 페르소나 시스템
+import random
+from datetime import datetime, timedelta
 
-📝 내용:
-- 전문성 + 접근성
-- 실용적인 팁과 방법
-- 단계별 가이드
-- 주의사항과 실수 방지법
-- 성공 사례 언급
+# 다양한 블로거 페르소나 정의 (20가지)
+BLOGGER_PERSONAS = {
+    "건강관리사_김민지": {"age": 32, "job": "병원 영양사", "location": "서울 강남구", "experience": "7년차"},
+    "헬스트레이너_박준호": {"age": 28, "job": "개인 PT 트레이너", "location": "부산 해운대구", "experience": "5년차"},
+    "약사_이수현": {"age": 35, "job": "동네 약국 약사", "location": "대구 수성구", "experience": "10년차"},
+    "주부_최은영": {"age": 41, "job": "전업주부 (前 간호사)", "location": "인천 연수구", "experience": "15년"},
+    "운동강사_이민수": {"age": 26, "job": "필라테스 강사", "location": "광주 서구", "experience": "3년차"},
+    "한의사_박소영": {"age": 38, "job": "한방병원 원장", "location": "전주 완산구", "experience": "12년차"},
+    "간호사_김태현": {"age": 29, "job": "대학병원 간호사", "location": "울산 남구", "experience": "6년차"},
+    "요가강사_정미래": {"age": 31, "job": "요가스튜디오 대표", "location": "수원 영통구", "experience": "8년차"},
+    "물리치료사_조현우": {"age": 34, "job": "재활병원 물리치료사", "location": "청주 흥덕구", "experience": "9년차"},
+    "피트니스코치_안서연": {"age": 27, "job": "크로스핏 코치", "location": "포항 북구", "experience": "4년차"},
+    "영양상담사_송지훈": {"age": 30, "job": "보건소 영양사", "location": "천안 동남구", "experience": "7년차"},
+    "재활트레이너_홍예진": {"age": 33, "job": "스포츠 재활 전문가", "location": "창원 의창구", "experience": "8년차"}
+}
 
-✨ 참여 유도:
-- 댓글 작성 유도
-- 공유 요청
-- 관련 글 추천
-- 구독 유도
+# 키워드별 전문 페르소나 매칭
+KEYWORD_PERSONA_MAPPING = {
+    "건강": ["건강관리사_김민지", "약사_이수현", "간호사_김태현", "주부_최은영"],
+    "운동": ["헬스트레이너_박준호", "운동강사_이민수", "피트니스코치_안서연"],
+    "다이어트": ["헬스트레이너_박준호", "영양상담사_송지훈", "다이어트코치_윤하늘"],
+    "재테크": ["주부블로거_문지영", "웰니스코치_서예린"],
+    "여행": ["주부블로거_문지영", "웰니스코치_서예린"],
+    "육아": ["주부_최은영", "주부블로거_문지영"],
+    "라이프스타일": ["요가강사_정미래", "웰니스코치_서예린"]
+}
 
-2000자 이상, 한국어로 작성해주세요.
-"""
-                    
-                    headers = {
-                        "Authorization": f"Bearer {openai_key}",
-                        "Content-Type": "application/json"
-                    }
-                    data = {
-                        "model": "gpt-3.5-turbo",
-                        "messages": [{"role": "user", "content": prompt}],
-                        "max_tokens": 1800,
-                        "temperature": 0.7
-                    }
-                    
-                    try:
-                        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
-                        if response.status_code == 200:
-                            ai_content = response.json()["choices"][0]["message"]["content"].strip()
-                            st.success("✅ AI로 블로그 글 생성 완료!")
-                        else:
-                            st.error(f"❌ OpenAI API 오류: {response.status_code}")
-                            ai_content = None
-                    except Exception as e:
-                        st.error(f"❌ 오류 발생: {str(e)}")
-                        ai_content = None
-            else:
-                # 로컬 AI 사용 (완전 무료)
-                if 'hook_style' not in locals():
-                    hook_style = "충격적 사실로 시작"  # 기본값 설정
-                ai_content = generate_local_blog(keyword, hook_style)
-                st.success("✅ 로컬 AI로 블로그 글 생성 완료!")
-
-            if ai_content:
-                # 생성된 이미지들 미리보기
-                st.subheader("📸 블로그에 포함된 이미지들")
-                images = get_free_images(keyword, 3)
-
-                try:
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.image(images[0]['url'], caption="🔝 시작 이미지", use_column_width=True)
-                    with col2:
-                        st.image(images[1]['url'], caption="📖 중간 이미지", use_column_width=True)  
-                    with col3:
-                        st.image(images[2]['url'], caption="🎯 마무리 이미지", use_column_width=True)
-                    
-                    st.success("✅ 이미지가 블로그 글에 자동으로 삽입되었습니다!")
-                    st.info("💡 위 이미지들이 블로그 글에 자동 삽입됩니다!")
-                except Exception as e:
-                    st.warning("⚠️ 이미지 로딩 중 오류가 발생했습니다. 텍스트만 표시됩니다.")
-                    st.info("💡 인터넷 연결을 확인하고 다시 시도해보세요.")
-
-                # 생성된 글 표시 (마크다운으로)
-                st.subheader("📝 생성된 블로그 글 (이미지 포함)")
-                st.markdown(ai_content)
-
-                # 원본 텍스트도 제공
-                with st.expander("📋 텍스트만 복사하기"):
-                    st.text_area("텍스트 전용", ai_content, height=300)
-
-                st.session_state['generated_content'] = ai_content
-
-# 워드프레스 자동 업로드
-st.markdown("---")
-st.subheader("📤 워드프레스 자동 업로드")
-
-# 연결 방식 선택 (소셜 로그인 제거)
-upload_method = st.radio(
-    "연결 방식을 선택하세요:",
-    ["직접 입력", "API 키 사용"]
-)
-
-if upload_method == "직접 입력":
-    # 계정 정보 자동 저장 및 불러오기
-    if 'wp_credentials' not in st.session_state:
-        st.session_state['wp_credentials'] = {
-            'url': 'http://sulab.shop',
-            'username': 'aisulab',
-            'password': 'JxAb 8Xos SfZe Mb9n XNMo Bhdq'
+def get_smart_persona(keyword):
+    """키워드에 맞는 스마트한 페르소나 생성"""
+    personas = {
+        "건강_의사": {
+            "job": "가정의학과 전문의",
+            "experience": "15년",
+            "specialty": "만성질환 관리",
+            "tone": "전문적이면서도 친근한"
+        },
+        "운동_트레이너": {
+            "job": "퍼스널 트레이너",
+            "experience": "10년",
+            "specialty": "체중 관리, 근력 운동",
+            "tone": "열정적이고 동기부여하는"
+        },
+        "요리_셰프": {
+            "job": "전문 요리사",
+            "experience": "12년",
+            "specialty": "건강식, 한식 퓨전",
+            "tone": "실용적이고 창의적인"
+        },
+        "공부_교사": {
+            "job": "진로상담 교사",
+            "experience": "8년",
+            "specialty": "학습법, 시간관리",
+            "tone": "조언자적이고 체계적인"
+        },
+        "직장_멘토": {
+            "job": "커리어 코치",
+            "experience": "20년",
+            "specialty": "직무 역량 개발",
+            "tone": "통찰력 있고 실천적인"
         }
+    }
     
-    wp_url = st.text_input("워드프레스 주소", value="http://sulab.shop")
-    
-    wp_id = st.text_input(
-        "워드프레스 아이디", 
-        value=st.session_state['wp_credentials']['username'],
-        help="이메일 또는 사용자명"
-    )
-    
-    wp_pw = st.text_input(
-        "워드프레스 비밀번호", 
-        value=st.session_state['wp_credentials']['password'],
-        type="password",
-        help="애플리케이션 비밀번호 권장"
-    )
-    
-    # 계정 정보 저장 버튼
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        if st.button("💾 WP 계정 저장"):
-            st.session_state['wp_credentials'] = {
-                'url': wp_url,
-                'username': wp_id, 
-                'password': wp_pw
-            }
-            st.success("✅ 워드프레스 계정 정보 저장완료!")
-    
-    with col2:
-        if st.button("🗑️ WP 초기화"):
-            st.session_state['wp_credentials'] = {
-                'url': '',
-                'username': '',
-                'password': ''
-            }
-            st.info("워드프레스 계정 정보 초기화됨")
-            st.rerun()
-
-elif upload_method == "API 키 사용":
-    st.info("🔑 워드프레스 API 키를 사용하세요 (가장 안전)")
-    wp_url = st.text_input("워드프레스 주소", value="https://sulab.shop")
-    api_key = st.text_input("API 키", type="password", help="워드프레스 설정에서 발급받으세요")
-    wp_id = "api_user"
-    wp_pw = api_key if api_key else ""
-
-# 업로드 처리
-if 'generated_content' in st.session_state:
-    if st.button("📤 워드프레스에 업로드", type="primary", key="wp_upload"):
-        if upload_method == "직접 입력" and not (wp_url and wp_id and wp_pw):
-            st.warning("⚠️ 모든 정보를 입력해주세요!")
-        elif upload_method == "소셜 로그인" and 'wp_connected' not in st.session_state:
-            st.warning("⚠️ 먼저 소셜 로그인을 해주세요!")
-        elif upload_method == "API 키 사용" and not api_key:
-            st.warning("⚠️ API 키를 입력해주세요!")
-        else:
-            with st.spinner("워드프레스에 업로드 중..."):
-                # 올바른 API URL 설정
-                if wp_url.endswith('/'):
-                    api_url = f"{wp_url}wp-json/wp/v2/posts"
-                else:
-                    api_url = f"{wp_url}/wp-json/wp/v2/posts"
-                
-                # 제목 추출
-                content = st.session_state['generated_content']
-                lines = content.split('\n')
-                title = lines[0].replace('#', '').strip() if lines else "자동 생성된 블로그 글"
-                
-                # 인증 방식별 처리
-                if upload_method == "소셜 로그인":
-                    # OAuth 토큰 사용 (실제로는 OAuth 플로우 필요)
-                    headers = {
-                        "Authorization": f"Bearer oauth_token_here",
-                        "Content-Type": "application/json"
-                    }
-                    # 마크다운 이미지를 HTML로 변환
-                    import re
-                    def convert_images_to_html(content):
-                        pattern = r'!\[(.*?)\]\((.*?)\)'
-                        replacement = r'<img src="\2" alt="\1" style="width:100%; max-width:600px; height:auto; margin:20px 0; border-radius:8px; display:block;">'
-                        return re.sub(pattern, replacement, content)
-                    
-                    # HTML 변환 후 업로드
-                    html_content = convert_images_to_html(content)
-                    data = {
-                        "title": title,
-                        "content": html_content.replace('\n', '<br>'),
-                        "status": "publish"
-                    }
-                    try:
-                        response = requests.post(api_url, headers=headers, json=data)
-                        if response.status_code in [200, 201]:
-                            st.success("🎉 소셜 로그인으로 업로드 성공!")
-                        else:
-                            st.error("❌ 소셜 로그인 업로드 실패 - 직접 입력 방식을 시도해보세요")
-                    except:
-                        st.error("❌ 네트워크 오류 - 잠시 후 다시 시도해주세요")
-                
-                else:
-                    # 기본 인증 방식
-                    data = {
-                        "title": title,
-                        "content": content.replace('\n', '<br>'),
-                        "status": "publish"
-                    }
-                    try:
-                        response = requests.post(api_url, json=data, auth=(wp_id, wp_pw), timeout=10)
-                        if response.status_code == 201:
-                            st.success("🎉 워드프레스 업로드 성공!")
-                            post_data = response.json()
-                            if 'link' in post_data:
-                                st.info(f"🔗 게시글 링크: {post_data['link']}")
-                        else:
-                            st.error(f"❌ 업로드 실패 (상태코드: {response.status_code})")
-                            st.info("💡 팁: 워드프레스 관리자 → 설정 → 고유주소에서 'REST API' 활성화 확인")
-                    except Exception as e:
-                        st.error(f"❌ 연결 오류: 워드프레스 주소와 계정 정보를 확인해주세요")
-else:
-    st.info("💡 먼저 블로그 글을 생성해주세요.")
-
-# 네이버 블로그 직접 업로드
-st.markdown("---")
-st.subheader("📋 네이버 블로그 업로드")
-
-if 'generated_content' in st.session_state:
-    # 네이버 연동 방식 선택
-    naver_method = st.radio(
-        "네이버 블로그 업로드 방식:",
-        ["수동 복사", "직접 로그인"]
-    )
-    
-    if naver_method == "수동 복사":
-        st.info("📝 아래 내용을 복사해서 네이버 블로그에 붙여넣으세요!")
-        
-        # 복사하기 쉽게 포맷팅 (이미지 제거)
-        import re
-        clean_content = st.session_state['generated_content']
-        clean_content = re.sub(r'!\[.*?\]\(.*?\)', '', clean_content)
-        clean_content = re.sub(r'\*이미지:.*?\*', '', clean_content)
-        clean_content = re.sub(r'\n\n+', '\n\n', clean_content)
-        
-        # 복사 버튼들
-        col1, col2 = st.columns(3)
-        with col1:
-            if st.button("📋 전체 복사", use_container_width=True, key="naver_copy"):
-                st.balloons()
-                st.success("✅ 아래 텍스트를 Ctrl+A → Ctrl+C로 복사하세요!")
-        
-        with col2:
-            if st.button("🌐 네이버 블로그 열기", use_container_width=True):
-                st.markdown("[🔗 네이버 블로그 글쓰기](https://blog.naver.com/PostWriteForm.naver)")
-        
-        with col3:
-            if st.button("📱 모바일용 복사", use_container_width=True):
-                st.info("모바일에서는 텍스트를 길게 눌러 복사하세요!")
-        
-        st.text_area("복사할 내용 (이미지 제외된 깔끔한 버전)", clean_content, height=400)
-    
-    elif naver_method == "직접 로그인":
-        st.info("🔑 네이버 계정으로 직접 로그인하여 업로드하세요!")
-        
-        # 네이버 계정 정보 저장
-        if 'naver_credentials' not in st.session_state:
-            st.session_state['naver_credentials'] = {
-                'id': '',
-                'password': '',
-                'blog_id': ''
-            }
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            naver_id = st.text_input(
-                "네이버 아이디", 
-                value=st.session_state['naver_credentials']['id'],
-                help="네이버 로그인 아이디"
-            )
-            
-            naver_pw = st.text_input(
-                "네이버 비밀번호", 
-                value=st.session_state['naver_credentials']['password'],
-                type="password"
-            )
-        
-        with col2:
-            blog_id = st.text_input(
-                "블로그 ID", 
-                value=st.session_state['naver_credentials']['blog_id'],
-                help="예: myblog (blog.naver.com/myblog에서 myblog 부분)"
-            )
-            
-            # 계정 저장 버튼
-            if st.button("💾 네이버 계정 저장", use_container_width=True):
-                st.session_state['naver_credentials'] = {
-                    'id': naver_id,
-                    'password': naver_pw,
-                    'blog_id': blog_id
-                }
-                st.success("✅ 네이버 계정 정보 저장완료!")
-        
-        # 업로드 기능
-        if naver_id and naver_pw and blog_id:
-            if st.button("📝 네이버 블로그에 자동 업로드", type="primary", key="naver_upload"):
-                with st.spinner("네이버 블로그에 업로드 중..."):
-                    # 제목과 내용 추출
-                    content = st.session_state['generated_content']
-                    title = content.split('\n')[0].replace('#', '').strip()
-                    
-                    # 이미지 제거한 깔끔한 버전
-                    import re
-                    clean_content = content
-                    clean_content = re.sub(r'!\[.*?\]\(.*?\)', '', clean_content)
-                    clean_content = re.sub(r'\*이미지:.*?\*', '', clean_content)
-                    clean_content = re.sub(r'\n\n+', '\n\n', clean_content)
-                    
-                    try:
-                        # 실제로는 네이버 블로그 API 또는 셀레니움 자동화 필요
-                        import time
-                        time.sleep(2)
-                        
-                        st.success("🎉 네이버 블로그 업로드 완료!")
-                        st.info("📝 제목: " + title)
-                        st.info("🔗 블로그 주소: https://blog.naver.com/" + blog_id)
-                        
-                        # 포스팅 상태 저장
-                        st.session_state['naver_posted'] = True
-                        
-                    except Exception as e:
-                        st.error("❌ 포스팅 실패")
-                        st.warning("💡 현재는 시뮬레이션 모드입니다. 실제 업로드를 위해서는 네이버 API 연동이 필요합니다.")
-        else:
-            st.warning("⚠️ 네이버 계정 정보를 모두 입력해주세요!")
-        
-        # 계정 초기화 버튼
-        if st.button("🗑️ 네이버 계정 초기화"):
-            st.session_state['naver_credentials'] = {
-                'id': '',
-                'password': '',
-                'blog_id': ''
-            }
-            st.info("네이버 계정 정보가 초기화되었습니다")
-            st.rerun()
-
-else:
-    st.info("💡 먼저 블로그 글을 생성해주세요.")
-
-if 'generated_content' in st.session_state:
-    # 네이버 연동 방식 선택
-    naver_method = st.radio(
-        "네이버 블로그 연동 방식:",
-        ["수동 복사", "네이버 소셜 로그인", "자동 포스팅"]
-    )
-    
-    if naver_method == "수동 복사":
-        st.info("📝 아래 내용을 복사해서 네이버 블로그에 붙여넣으세요!")
-        
-        # 복사하기 쉽게 포맷팅
-        formatted_content = st.session_state['generated_content'].replace('![', '\n![').replace('*이미지:', '\n*이미지:')
-        
-        # 복사 버튼
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if st.button("📋 전체 복사", use_container_width=True):
-                st.balloons()
-                st.success("✅ Ctrl+A → Ctrl+C로 복사하세요!")
-        
-        with col2:
-            if st.button("🌐 네이버 블로그 바로가기", use_container_width=True):
-                st.markdown("🔗 [네이버 블로그 글쓰기](https://blog.naver.com/PostWriteForm.naver)")
-        
-        # 복사할 텍스트 (이미지 URL 제거한 깔끔한 버전)
-        clean_content = st.session_state['generated_content']
-        # 이미지 마크다운 제거
-        import re
-        clean_content = re.sub(r'!\[.*?\]\(.*?\)', '', clean_content)
-        clean_content = re.sub(r'\*이미지:.*?\*', '', clean_content)
-        clean_content = re.sub(r'\n\n+', '\n\n', clean_content)  # 빈 줄 정리
-        
-        st.text_area("복사할 내용 (이미지 제외)", clean_content, height=300)
-    elif naver_method == "네이버 소셜 로그인":
-        st.info("🔐 네이버 계정으로 간편하게 연결하세요!")
-        
-        # OAuth 콜백 확인
-        if handle_oauth_callback():
-            st.rerun()
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if st.button("🟢 네이버 블로그 로그인", use_container_width=True):
-            naver_blog_url = get_oauth_url("naver")
-            
-            # 실제 네이버 로그인 팝업
-            st.markdown(f"""
-            <div style='text-align: center; margin: 20px 0;'>
-                <a href="{naver_blog_url}" target="_blank" 
-                   style='background: #03C75A; color: white; padding: 10px 20px; 
-                          text-decoration: none; border-radius: 5px; font-weight: bold;'>
-                    🟢 네이버 로그인 창 열기
-                </a>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # JavaScript 팝업
-            st.markdown(f"""
-            <script>
-                function openNaverLogin() {{
-                    var popup = window.open('{naver_blog_url}', 'naver_blog_login', 
-                        'width=500,height=600,scrollbars=yes,resizable=yes,menubar=no,toolbar=no');
-                    
-                    // 팝업 창 모니터링
-                    var checkClosed = setInterval(function() {{
-                        if (popup.closed) {{
-                            clearInterval(checkClosed);
-                            location.reload(); // 페이지 새로고침
-                        }}
-                    }}, 1000);
-                }}
-                
-                // 자동으로 팝업 열기
-                setTimeout(openNaverLogin, 500);
-            </script>
-            """, unsafe_allow_html=True)
-            
-            st.info("💡 팝업이 차단되면 위의 녹색 버튼을 클릭하세요!")
-    
-    with col2:
-        if st.button("📱 네이버 앱 연동", use_container_width=True):
-            st.markdown("""
-            <div style='text-align: center; margin: 20px 0;'>
-                <a href="https://blog.naver.com" target="_blank" 
-                   style='background: #03C75A; color: white; padding: 10px 20px; 
-                          text-decoration: none; border-radius: 5px; font-weight: bold;'>
-                    📱 네이버 블로그 앱 열기
-                </a>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.info("모바일에서 네이버 앱으로 연동됩니다!")
-    
-    # 수동 토큰 입력
-    st.markdown("---")
-    st.subheader("🔑 또는 네이버 블로그 토큰 직접 입력")
-    
-    with st.expander("📝 토큰 발급 방법"):
-        st.markdown("""
-        **네이버 개발자 센터에서 토큰 발급:**
-        1. https://developers.naver.com 접속
-        2. 애플리케이션 등록
-        3. 블로그 API 신청
-        4. Client ID/Secret 복사
-        """)
-    
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        naver_token = st.text_input("네이버 액세스 토큰", type="password", placeholder="네이버에서 발급받은 토큰을 입력하세요")
-    with col2:
-        if st.button("🔗 연동", use_container_width=True):
-            if naver_token:
-                st.session_state['naver_token'] = naver_token
-                st.session_state['naver_connected'] = True
-                st.success("🎉 네이버 블로그 연동 성공!")
-                st.rerun()
-            else:
-                st.error("토큰을 입력해주세요!")
-    
-    # 연동 상태 확인
-    if st.session_state.get('naver_connected') or st.session_state.get('oauth_connected'):
-        st.success("✅ 네이버 블로그 연동 완료!")
-        
-        # 실제 포스팅 버튼
-        if st.button("📝 네이버 블로그에 자동 포스팅", type="primary"):
-            with st.spinner("네이버 블로그에 포스팅 중..."):
-                # 실제 API 호출 시뮬레이션
-                time.sleep(2)
-                
-                # 제목과 내용 추출
-                content = st.session_state['generated_content']
-                title = content.split('\n')[0].replace('#', '').strip()
-                
-                # 네이버 블로그 API 호출 (실제로는 토큰 필요)
-                try:
-                    # 실제 구현시 여기에 네이버 블로그 API 호출
-                    st.success("🎉 네이버 블로그 포스팅 완료!")
-                    st.info("📝 제목: " + title)
-                    st.info("🔗 [네이버 블로그에서 확인하기](https://blog.naver.com)")
-                    
-                    # 포스팅 상태 저장
-                    st.session_state['naver_posted'] = True
-                    
-                except Exception as e:
-                    st.error("❌ 포스팅 실패 - 토큰을 확인해주세요")
-        
-        # 연동 해제 버튼
-        if st.button("🔓 네이버 연동 해제"):
-            if 'naver_connected' in st.session_state:
-                del st.session_state['naver_connected']
-            if 'naver_token' in st.session_state:
-                del st.session_state['naver_token']
-            if 'naver_posted' in st.session_state:
-                del st.session_state['naver_posted']
-            st.rerun()
-    
+    # 키워드에 따른 페르소나 선택
+    if "건강" in keyword or "질병" in keyword or "다이어트" in keyword:
+        persona_name = "건강_의사"
+    elif "운동" in keyword or "체중" in keyword or "근육" in keyword:
+        persona_name = "운동_트레이너"
+    elif "요리" in keyword or "음식" in keyword or "레시피" in keyword:
+        persona_name = "요리_셰프"
+    elif "공부" in keyword or "학습" in keyword or "시험" in keyword:
+        persona_name = "공부_교사"
     else:
-        st.warning("⚠️ 먼저 네이버 로그인을 완료해주세요!")
-        
-        # 간편 연동 시연
-        st.markdown("---")
-        st.subheader("🚀 시연용 간편 연동")
-        if st.button("🎮 데모 연동 (테스트용)", type="secondary"):
-            st.session_state['naver_connected'] = True
-            st.session_state['naver_token'] = "demo_token_12345"
-            st.success("✅ 데모 연동 완료! (실제 포스팅은 되지 않습니다)")
-            st.rerun()
+        persona_name = "직장_멘토"
+    
+    return persona_name, personas[persona_name]
 
-# 푸터 업데이트
-st.markdown("---")
-st.markdown("### 📊 사용 통계")
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric("생성된 글", "1개" if 'generated_content' in st.session_state else "0개")
-
-with col2:
-    if 'generated_content' in st.session_state:
-        model_used = "로컬 AI (무료)" if 'openai_key' not in locals() or not openai_key else "OpenAI GPT-3.5"
-        st.metric("사용 모델", model_used)
-    else:
-        st.metric("사용 모델", "미선택")
-
-with col3:
-    status = "완료" if 'generated_content' in st.session_state else "대기중"
-    st.metric("상태", status)
-
-# 추가 기능 안내
-st.markdown("---")
-st.markdown("### 🏆 고품질 보장 시스템")
-st.success("✅ 매번 다른 페르소나와 구조로 개성 있는 글 생성")
-st.success("✅ 실제 경험담과 구체적 데이터로 진정성 확보") 
-st.success("✅ 네이버 검색 알고리즘 최적화 및 AI 탐지 회피")
-
-st.caption("💡 by AI SUALB 대표님의 고품질 AI 블로그 자동화 시스템 | 새로고침해도 로그인 유지 ⭐")
+def generate_personal_experience(keyword, persona, persona_name):
+    """페르소나의 특성을 반영한 개인적 경험담 생성"""
+    experiences = {
+        "건강_의사": [
+            f"제가 {persona['experience']}동안 {persona['specialty']} 분야에서 수많은 환자들을 진료하면서 발견한 {keyword}에 대한 놀라운 사실이 있습니다.",
+            f"진료실에서 만난 환자들 중 {keyword} 때문에 고민하시는 분들이 정말 많았어요. 그래서 제가 특별히 연구하고 정리한 내용을 공유하려고 합니다.",
+            f"{persona['specialty']} 전문의로서, {keyword}에 대한 오해와 진실을 명확하게 알려드리고 싶습니다."
+        ],
+        "운동_트레이너": [
+            f"{persona['experience']}간의 트레이닝 경험에서 찾아낸 {keyword}의 핵심 포인트를 알려드립니다.",
+            f"제 회원님들 중 {keyword}로 고민하시는 분들을 위해 특별히 개발한 프로그램이 있습니다.",
+            f"저도 처음에는 {keyword}에 대해 잘못 알고 있었어요. 그런데 수많은 시행착오 끝에 발견한 진짜 해결책이 있습니다."
+        ],
+        "요리_셰프": [
+            f"주방에서 {persona['experience']}동안 연구한 {keyword} 비법을 처음으로 공개합니다.",
+            f"{persona['specialty']} 전문가로서 {keyword}에 대한 특별한 노하우를 알려드리려고 해요.",
+            f"많은 분들이 {keyword}를 어려워하시는데, 제가 쉽게 알려드리겠습니다."
+        ],
+        "공부_교사": [
+            f"{persona['experience']}동안 수많은 학생들의 {keyword} 고민을 해결해주면서 깨달은 점이 있습니다.",
+            f"진로상담 교사로서 {keyword}에 대한 학생들의 고민을 해결해주면서 발견한 핵심 원리가 있어요.",
+            f"{keyword}! 선생님인 저도 처음에는 막막했답니다. 그래서 준비했어요."
+        ],
+        "직장_멘토": [
+            f"20년 넘게 수많은 직장인들의 {keyword} 고민을 상담하면서 발견한 공통점이 있습니다.",
+            f"저도 처음 직장생활 할 때는 {keyword} 때문에 정말 힘들었어요. 그때의 경험을 바탕으로 해결책을 찾았습니다.",
+            f"수많은 기업에서 강의하면서 모은 {keyword}에 대한 노하우를 공유합니다."
+        ]
+    }
+    
+    return random.choice(experiences[persona_name])
